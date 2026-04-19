@@ -284,8 +284,8 @@ class QueryMatcher:
         self.data = data
         self.synonyms = {
             "college_overview": ["about", "history", "pesce", "college", "vision", "mission", "established", "naac", "nba", "accreditation", "overview", "location", "located"],
-            "academics": ["branch", "department", "course", "program", "academic", "study", "syllabus", "engineering", "semester", "exam", "b.e.", "m.tech", "mca", "mba", "phd"],
-            "departments": ["cse", "ise", "ece", "eee", "mechanical", "civil", "aiml", "faculty", "hod", "professor", "teacher", "staff"],
+            "academics": ["branch", "department", "course", "courses", "program", "programs", "academic", "study", "syllabus", "engineering", "semester", "exam", "b.e.", "m.tech", "mca", "mba", "phd", "class"],
+            "departments": ["cse", "ise", "ece", "eee", "mechanical", "civil", "aiml", "faculty", "hod", "professor", "teacher", "staff", "professors"],
             "facilities": ["hostel", "dorm", "accommodation", "stay", "library", "canteen", "sports", "dispensary", "medical", "room", "facility", "wifi", "gym", "warden", "boys", "girls"],
             "placements": ["placement", "job", "recruitment", "hiring", "company", "companies", "offer", "package", "salary", "internship", "career", "training"],
             "administrative": ["fee", "tuition", "payment", "cost", "admission", "admin", "contact", "email", "phone", "document", "principal", "vice principal"],
@@ -318,21 +318,21 @@ class QueryMatcher:
                 elif word in syns: 
                     scores[cat] += 0.8
                     
-        results = [
-            {"category": cat, "content": self.data[cat], "confidence": min(score, 1.0)}
-            for cat, score in scores.items() if score >= 0.8
-        ]
-        results.sort(key=lambda x: x["confidence"], reverse=True)
-        if not results: return None, None, 0.0
-        best_conf = results[0]["confidence"]
-        
-        if len(results) > 1:
-            return {r["category"]: r["content"] for r in results}, [r["category"] for r in results], best_conf
-        else:
-            cat, content = results[0]["category"], dict(results[0]["content"])
-            if cat == "placements" and any(cw in ["cse", "cs", "computer"] for cw in corrected_words):
+        # Find the single best category based on raw scores
+        best_cat = None
+        best_score = 0.0
+        for cat, score in scores.items():
+            if score > best_score:
+                best_score = score
+                best_cat = cat
+                
+        if best_score >= 0.8 and best_cat:
+            content = dict(self.data[best_cat])
+            if best_cat == "placements" and any(cw in ["cse", "cs", "computer"] for cw in words):
                 content["filter_note"] = "💡 Note: Placements listed are overall numbers (includes CSE specific data)."
-            return content, cat, best_conf
+            return content, best_cat, min(best_score, 1.0)
+            
+        return None, None, 0.0
 
 def find_answer(query):
     """
