@@ -1,47 +1,53 @@
 {
-  "academics": {
-    "structure": "4 years B.E. program",
-    "semester": "Odd (Sep-Feb), Even (Feb-Jul)",
-    "programs": [
-      "Civil Engineering",
-      "Mechanical Engineering",
-      "Electrical and Electronics Engineering",
-      "Electronics and Communication Engineering",
-      "Industrial and Production Engineering",
-      "Computer Science and Engineering",
-      "Information Science and Engineering",
-      "Automobile Engineering",
-      "Artificial Intelligence and Machine Learning",
-      "Computer Science and Business Systems",
-      "Electronics and Instrumentation Engineering"
+  "college_overview": {
+    "full_name": "P. E. S. College of Engineering, Mandya",
+    "short_name": "PESCE",
+    "established": 1962,
+    "founder": "Late Sri K. V. Shankara Gowda",
+    "trust": "People's Education Society (PES), Mandya",
+    "affiliation": "Visvesvaraya Technological University (VTU), Belagavi",
+    "autonomous_since": "2008-09 (granted by UGC)",
+    "accreditations": [
+      "AICTE (All India Council for Technical Education) approved",
+      "NBA (National Board of Accreditation) accredited",
+      "NAAC A Grade accredited",
+      "TEQIP grants beneficiary"
     ],
-    "exam_pattern": "CIE 50 + SEE 50 marks"
+    "campus_location": "Mandya, Karnataka (on Bangalore-Mysore Highway)",
+    "total_students": "3500+",
+    "total_placements": "1000+",
+    "phds_awarded": "140+",
+    "publications": "2050+",
+    "vision": "PESCE shall be a leading institution imparting quality engineering and management education developing creative and socially responsible professionals.",
+    "mission": [
+      "Provide state of the art infrastructure, motivate the faculty to be proficient in their field of specialization and adopt best teaching-learning practices.",
+      "Impart engineering and managerial skills through competent and committed faculty using outcome based educational curriculum.",
+      "Inculcate professional ethics, leadership qualities and entrepreneurial skills to meet the societal needs.",
+      "Promote research, product development and industry-institution interaction."
+    ],
+    "quality_policy": "Highly committed in providing quality, concurrent technical education and continuously striving to meet expectations of stake holders",
+    "core_values": ["Professionalism", "Empathy", "Synergy", "Commitment", "Ethics"],
+    "social_media": {
+      "linkedin": "https://www.linkedin.com/school/pes-college-of-engineering/",
+      "youtube": "https://youtube.com/@pescemandya4660",
+      "facebook": "https://www.facebook.com/pesce1962",
+      "instagram": "https://www.instagram.com/pesmandya/",
+      "twitter": "https://twitter.com/pesce1962"
+    }
   },
-  "placements": {
-    "companies_visited": 359,
-    "students_placed": 549,
-    "total_offers": 1034,
-    "top_companies": [
-      "TCS", "Infosys", "Wipro", "Accenture", "Capgemini", "HCL", "IBM", "Tech Mahindra", "Cognizant", "MindTree",
-      "Bosch", "L&T", "Deloitte", "Amazon", "Cisco", "Intel", "Oracle", "SAP", "Mercedes Benz", "TVS Motors"
-    ]
-  },
-  "facilities": {
-    "library": "13,099.38 sq ft, 100 capacity, 10AM-5:30PM",
-    "boys_hostel": "350 capacity, Warden: Dr. Srinivasa M R +919448282593",
-    "girls_hostel": "371 capacity, Warden: Shwetha M K +91 94482 82595",
-    "dispensary": "Dr. Nakul N Rao (Medical Officer), 24/7",
-    "canteen": "250 capacity, South & North Indian food",
-    "sports": "Cricket stadium, Swimming pool, Tennis courts"
-  },
+
   "administrative": {
+    "principal": "Dr. N.L. Murali Krishna",
+    "vice_principal": "Dr. Vinay S",
+    "admission_coordinator": "Manish Kumar S",
+    "pro": "Mr. S. Nandeesha (+91 9448573099)",
     "admission_email": "admissions@pesce.ac.in",
     "admission_phone": "+91 94482 82588",
-    "principal": "Dr. H. M. Nanjundaswamy",
+    "landline": "08232-220043 / 238042",
     "admission_types": [
-      "CET (E023)",
-      "UNAIDED (E058)",
-      "COMED-K (E089)"
+      {"code": "E023", "type": "Karnataka CET"},
+      {"code": "E058", "type": "UNAIDED (Management Quota)"},
+      {"code": "E089", "type": "COMED-K"}
     ],
     "required_documents": [
       "10th/SSLC Marks Card",
@@ -54,119 +60,375 @@
       "Recent Passport Size Photographs (Minimum 4)"
     ]
   },
+
+  "academics": {
+    "structure": "4 years B.E. program (8 semesters)",
+    "semester_schedule": {
+      "odd": "September to February",
+      "even": "February to July"
+    },
+    "exam_pattern": "CIE 50 marks + SEE 50 marks = Total 100",
+    "branch_change": "Permitted at start of 3rd semester based on 1st-year CGPA and seat availability",
+    "undergraduate_programs": [
+      {"name": "Civil Engineering", "code": "CE", "duration": "4 Years", "intake": null},
+      {"name": "Computer Science & Engineering", "code": "CSE", "duration": "4 Years", "intake": null},
+      {"name": "Computer Science & Engineering (AI & ML)", "code": "CSE-AIML", "duration": "4 Years", "intake": null},
+      {"name": "Computer Science & Engineering (Data Science)", "code": "CSE-DS", "duration": "4 Years", "intake": null},
+      {"name": "Computer Science & Business System", "code": "CSBS", "duration": "4 Years", "intake": null},
+      {"name": "Electronics & Communication Engineering", "code": "ECE", "duration": "4 Years", "intake": null},
+      {"name": "Electrical & Electronics Engineering", "code": "EEE", "duration": "4 Years", "intake": null},
+      {"name": "Information Science & Engineering", "code": "ISE", "duration": "4 Years", "intake": 60},
+      {"name": "Mechanical Engineering", "code": "ME", "duration": "4 Years", "intake": null},
+      {"name": "Automobile Engineering", "code": "AE", "duration": "4 Years", "intake": null},
+      {"name": "Industrial & Production Engineering", "code": "IPE", "duration": "4 Years", "intake": null},
+      {"name": "Robotics and Artificial Intelligence Engineering", "code": "RAI", "duration": "4 Years", "intake": null},
+      {"name": "Electronics & Communication (VLSI Design & Technology)", "code": "ECE-VLSI", "duration": "4 Years", "intake": null}
+    ],
+    "postgraduate_programs": [
+      {"name": "M.Tech CSE", "duration": "2 Years"},
+      {"name": "M.Tech Machine Design", "duration": "2 Years"},
+      {"name": "M.Tech VLSI & Embedded Systems", "duration": "2 Years"},
+      {"name": "M.Tech Civil (CAD)", "duration": "2 Years"},
+      {"name": "Master of Computer Applications (MCA)", "duration": "2 Years"},
+      {"name": "Master of Business Administration (MBA)", "duration": "2 Years"}
+    ],
+    "doctoral_programs": [
+      {"name": "Ph.D (Research)", "duration": "Varies"}
+    ],
+    "basic_science_departments": [
+      {"name": "Mathematics", "duration": "3 Years"},
+      {"name": "Physics", "duration": "3 Years"},
+      {"name": "Chemistry", "duration": "3 Years"}
+    ]
+  },
+
+  "departments": {
+    "CSE": {
+      "full_name": "Computer Science & Engineering",
+      "hod": "Dr. Anitha M L",
+      "url": "https://pesce.ac.in/department-computer-science.php",
+      "faculty": [
+        {"name": "Dr. M C Padma", "designation": "Professor"},
+        {"name": "Dr H.P Mohan Kumar", "designation": "Professor"},
+        {"name": "Dr. Nagarathna", "designation": "Professor"},
+        {"name": "Dr. Anitha M L", "designation": "Professor and HOD"},
+        {"name": "Prasanna. P", "designation": "Associate Professor"},
+        {"name": "Dr. Veena M", "designation": "Associate Professor"},
+        {"name": "Dr. Prasanna Kumar R.S", "designation": "Associate Professor"},
+        {"name": "Dr. Girish Babu MC", "designation": "Associate Professor"},
+        {"name": "Dr. H R Divakar", "designation": "Associate Professor"},
+        {"name": "Dr. Deepika", "designation": "Associate Professor"},
+        {"name": "S.K Shivashankar", "designation": "Assistant Professor"},
+        {"name": "Chaitra.B.P.", "designation": "Assistant Professor"},
+        {"name": "Shwetha M K", "designation": "Assistant Professor"},
+        {"name": "Bhavya.D", "designation": "Assistant Professor"},
+        {"name": "C Chethana", "designation": "Assistant Professor"},
+        {"name": "Suraj B S", "designation": "Assistant Professor"},
+        {"name": "Sindhu B S", "designation": "Assistant Professor"},
+        {"name": "Raghavendra Babu TM", "designation": "Assistant Professor"},
+        {"name": "Promod Kumar B M", "designation": "Assistant Professor"},
+        {"name": "Poojitha N", "designation": "Assistant Professor"},
+        {"name": "B. J. Srujana", "designation": "Assistant Professor"},
+        {"name": "Namratha H T", "designation": "Assistant Professor"},
+        {"name": "Thejashwini M", "designation": "Assistant Professor"},
+        {"name": "Hemalatha B", "designation": "Assistant Professor"},
+        {"name": "Sukanya H N", "designation": "Assistant Professor"},
+        {"name": "VedaShree YC", "designation": "Assistant Professor"},
+        {"name": "Manasa S", "designation": "Assistant Professor"},
+        {"name": "Megha A", "designation": "Assistant Professor"},
+        {"name": "Kousthubha HR", "designation": "Assistant Professor"},
+        {"name": "Rashmi Y S", "designation": "Assistant Professor"}
+      ]
+    },
+    "ISE": {
+      "full_name": "Information Science & Engineering",
+      "hod": "Dr. T.S. Prabhakar",
+      "url": "https://pesce.ac.in/dep-information-science-engg.php",
+      "intake": 60,
+      "established": 2000,
+      "faculty": [
+        {"name": "Dr. Minavathi", "designation": "Professor"},
+        {"name": "Dr. M R Suresh", "designation": "Professor"},
+        {"name": "Dr. T.S. Prabhakar", "designation": "Associate Professor & HOD"},
+        {"name": "Dr. Bramesh S.M.", "designation": "Associate Professor"},
+        {"name": "Dr. Rakshith N", "designation": "Associate Professor"},
+        {"name": "Harshith K.S.", "designation": "Assistant Professor"},
+        {"name": "Ruchitha K.J", "designation": "Assistant Professor"},
+        {"name": "Nandish J", "designation": "Assistant Professor"},
+        {"name": "Sushmitha S R", "designation": "Assistant Professor"}
+      ]
+    }
+  },
+
+  "placements": {
+    "placement_officer": "Deepthi K P",
+    "placement_email": "placement@pesce.ac.in",
+    "placement_phone": "08232-220043-281 / +91 94482 82589",
+    "assistant_placement_officer": "Madhusudhan M S (+91 8970174797)",
+    "training_officer": "Dr. Raghavendra S (training@pesce.ac.in)",
+    "student_counsellor": "Dr. Bindiya J (Psychiatrist, MIMS)",
+    "placement_team": [
+      {"name": "Dr. Vinay S", "role": "Vice Principal"},
+      {"name": "Deepthi K P", "role": "Placement Officer"},
+      {"name": "Madhusudhan M S", "role": "Asst. Placement Officer"},
+      {"name": "Dr. Ragavendra S", "role": "Assistant Training Officer"},
+      {"name": "Dr. Bindiya J", "role": "Student Counsellor (Psychiatrist, MIMS)"},
+      {"name": "Yogesh M R", "role": "Secretary"},
+      {"name": "Yashwanth Gowda M V", "role": "Placement Coordinator"}
+    ],
+    "companies_visited": 359,
+    "students_placed": 549,
+    "total_offers": 1034,
+    "top_companies": [
+      "TCS", "Infosys", "Wipro", "Accenture", "Capgemini", "HCL", "IBM",
+      "Tech Mahindra", "Cognizant", "MindTree", "Bosch", "L&T", "Deloitte",
+      "Amazon", "Cisco", "Intel", "Oracle", "SAP", "Mercedes Benz", "TVS Motors"
+    ],
+    "training_programs": [
+      "Soft-Skill Development",
+      "Personality Development",
+      "Communication Skills",
+      "Aptitude Training",
+      "Interview and GD Skills",
+      "Self-Motivation Programs",
+      "Pre-placement Industry Interactions",
+      "Guidance to Continuing Education"
+    ],
+    "amenities": [
+      "Air-conditioned 400 seater auditorium with Audio-visual facility",
+      "Training Center",
+      "Board room",
+      "Interview rooms",
+      "Library",
+      "Dining Hall"
+    ]
+  },
+
+  "facilities": {
+    "library": {
+      "name": "Library and Information Center",
+      "area": "13,099.38 sq ft",
+      "capacity": 100,
+      "timing": "10:00 AM - 5:30 PM"
+    },
+    "boys_hostel": {
+      "name": "PESCE Boys Hostel",
+      "location": "Within campus",
+      "rooms": "89 single + 21 double + 73 triple occupancy",
+      "total_capacity": 350,
+      "warden": "Dr. Srinivasa M R",
+      "warden_phone": "+91 94482 82593 / 9980329132",
+      "hostel_manager": "Girish K P (+91 91413 36956)",
+      "facilities": ["Free medical", "Library", "TV room", "Wi-Fi", "Solar water heaters", "CCTV", "Playground", "Vehicle parking", "Separate mess"]
+    },
+    "girls_hostel": {
+      "name": "PESCE Girls Hostel",
+      "location": "Inside campus",
+      "rooms": "67 double + 79 triple occupancy",
+      "total_inmates": 371,
+      "warden": "Shwetha M K",
+      "warden_phone": "+91 94482 82595",
+      "hostel_manager": "Nanda (+91 95905 54700)",
+      "facilities": ["Free Medical", "Library", "TV room", "Wi-Fi", "Solar water heaters", "CCTV", "Playground", "Separate mess"]
+    },
+    "dispensary": {
+      "name": "Campus Dispensary",
+      "medical_officer": "Dr. Nakul N Rao",
+      "availability": "24/7"
+    },
+    "canteen": {
+      "capacity": 250,
+      "food_type": "South Indian & North Indian cuisine"
+    },
+    "sports": {
+      "facilities": ["Cricket stadium", "Swimming pool", "Tennis courts", "Playground"]
+    },
+    "bank_atm": "On-campus Bank ATM facility",
+    "cooperative_society": "Campus Cooperative Society for stationery and supplies",
+    "guest_house": "PESCE Guest House for visitors",
+    "wifi": "Available across academic blocks, central library, and hostel premises",
+    "secure_campus": "24/7 CCTV surveillance and security"
+  },
+
   "contacts": {
     "admission_helpline": "+91 94482 82588",
     "admission_email": "admissions@pesce.ac.in",
-    "principal_office": "+91 8232 220043",
+    "principal_office": "08232 220043",
+    "placement_office": "placement@pesce.ac.in / 08232-220043-281",
+    "training_office": "training@pesce.ac.in",
     "boys_hostel_warden": "Dr. Srinivasa M R (+91 94482 82593)",
     "girls_hostel_warden": "Shwetha M K (+91 94482 82595)",
-    "medical_officer": "Dr. Nakul N Rao (Available 24/7)"
+    "boys_hostel_manager": "Girish K P (+91 91413 36956)",
+    "girls_hostel_manager": "Nanda (+91 95905 54700)",
+    "medical_officer": "Dr. Nakul N Rao (24/7)",
+    "pro": "Mr. S. Nandeesha (+91 9448573099)",
+    "admission_coordinator": "Manish Kumar S"
   },
+
+  "cells_and_committees": {
+    "iqac": "Internal Quality Assurance Cell",
+    "iiic": "Industry Institute Interaction Cell",
+    "nss": "National Service Scheme (NSS)",
+    "professional_bodies": "ISTE, IEEE, CSI student chapters",
+    "grievance": "Grievance Redressal Committee",
+    "aicte_idea_lab": "AICTE Idea Lab"
+  },
+
   "faq": {
     "Admission": [
       {
-        "question": "How do I get admission?",
-        "answer": "Admission is processed through CET, COMED-K, or Management quota (UNAIDED). You must attend the respective counseling sessions after clearing the entrance exams and select PESCE."
+        "question": "How do I get admission to PESCE?",
+        "answer": "Admission is through Karnataka CET (code E023), COMED-K (code E089), or Management Quota/UNAIDED (code E058). Attend counseling after clearing entrance exams and select PESCE."
       },
       {
-        "question": "What are admission codes?",
-        "answer": "Use code E023 for Karnataka CET, E058 for UNAIDED (Management), and E089 for COMED-K during your option entry."
+        "question": "What are the admission codes?",
+        "answer": "CET: E023, UNAIDED (Management): E058, COMED-K: E089."
       },
       {
-        "question": "What documents do I need?",
-        "answer": "You need your 10th and 12th marks cards, Transfer Certificate, Entrance Exam Rank Card & Allotment Order, Aadhaar copy, Caste/Income certificate (if applicable), and 4 passport size photos."
+        "question": "What documents are needed for admission?",
+        "answer": "10th & 12th marks cards, Transfer Certificate, Entrance Exam Rank Card & Allotment Order, Aadhaar copy, Caste/Income certificate (if applicable), and 4 passport size photos."
       },
       {
         "question": "What's the fee structure?",
-        "answer": "Fees vary strictly by quota. CET students pay government-subsidized fees, COMED-K students pay standard private fees, and UNAIDED (Management) varies by branch."
+        "answer": "Fees vary by quota. CET students pay government-subsidized fees, COMED-K students pay standard private fees, and Management quota varies by branch. Check pesce.ac.in/admissions.php for current fee PDFs."
+      },
+      {
+        "question": "Who is the admission coordinator?",
+        "answer": "Manish Kumar S is the Admissions Coordinator. Contact: +91 94482 82588 or admissions@pesce.ac.in. PRO: Mr. S. Nandeesha (+91 9448573099)."
+      },
+      {
+        "question": "Is lateral entry available?",
+        "answer": "Yes, lateral entry is available with 10% intake from 2nd year for diploma holders."
       },
       {
         "question": "Can I apply for multiple admission types?",
-        "answer": "Yes, you can write multiple entrance exams (like CET and COMED-K) but you can only lock the seat under a single quota at the time of admission."
+        "answer": "Yes, you can appear for CET and COMED-K both, but seat is locked under only one quota at admission time."
       }
     ],
     "Academic": [
       {
-        "question": "How many years is the course?",
-        "answer": "The standard B.E. (Bachelor of Engineering) program strictly lasts for 4 years, divided into 8 semesters."
+        "question": "How many years is the B.E. course?",
+        "answer": "Standard B.E. is 4 years (8 semesters). M.Tech/MCA/MBA are 2 years. Ph.D duration varies."
       },
       {
         "question": "What's the difference between CSE and CSE(AI&ML)?",
-        "answer": "CSE is general computer science covering all software engineering fundamentals. CSE(AI&ML) specializes heavily in artificial intelligence, neural networks, and data science earlier in the curriculum."
+        "answer": "CSE covers general software engineering. CSE(AI&ML) specializes in artificial intelligence, neural networks, and data science from early semesters."
       },
       {
-        "question": "Is the college autonomous?",
-        "answer": "Yes! PESCE has been an autonomous institution under VTU since 2008, meaning we design our own advanced curriculum and conduct our own exams."
+        "question": "Is PESCE autonomous?",
+        "answer": "Yes! PESCE is autonomous under VTU since 2008-09, designing its own curriculum and conducting exams independently."
       },
       {
         "question": "What's the exam pattern?",
-        "answer": "We follow a 50-50 model: Continuous Internal Evaluation (CIE) makes up 50 marks, and the Semester End Examination (SEE) makes up the remaining 50 marks."
+        "answer": "CIE (50 marks) + SEE (50 marks) = 100 marks total per subject."
       },
       {
         "question": "Can I change my branch?",
-        "answer": "Branch changes are permitted at the start of the 3rd semester (2nd year) but are strictly dependent on your 1st-year CGPA and seat availability in the desired branch."
+        "answer": "Yes, at the start of 3rd semester based on 1st-year CGPA and seat availability."
+      },
+      {
+        "question": "What programs does PESCE offer?",
+        "answer": "13 B.E. programs (CSE, ISE, ECE, EEE, ME, Civil, AIML, Data Science, CSBS, Automobile, IPE, Robotics, VLSI), 4 M.Tech programs, MCA, MBA, and Ph.D."
       }
     ],
     "Placement": [
       {
-        "question": "What's the average package?",
-        "answer": "The average package highly depends on the branch, but generally ranges between 5 to 8 LPA, with top technical roles exceeding 12-15+ LPA."
+        "question": "What's the average placement package?",
+        "answer": "Average ranges 5-8 LPA, with top roles exceeding 12-15+ LPA depending on branch and skills."
       },
       {
-        "question": "Which companies visit?",
-        "answer": "Over 350 companies visit, including giants like TCS, Infosys, Wipro, Accenture, Capgemini, HCL, IBM, Deloitte, Cisco, and Mercedes Benz."
+        "question": "Which companies visit PESCE?",
+        "answer": "350+ companies including TCS, Infosys, Wipro, Accenture, Capgemini, HCL, IBM, Deloitte, Cisco, Amazon, Mercedes Benz, Bosch, L&T, Oracle, SAP, Intel."
       },
       {
         "question": "What's the placement percentage?",
-        "answer": "Historically, placement percentages have remained robust across eligible students, often exceeding 85-90% for core IT and CSE branches."
+        "answer": "Typically 85-90%+ for CSE and IT branches. Overall 549 students placed with 1034 total offers."
       },
       {
-        "question": "Are internships available?",
-        "answer": "Yes, mandatory internships are built into the curriculum. Many top companies also offer pre-placement internships during the 7th/8th semester."
+        "question": "Who is the placement officer?",
+        "answer": "Deepthi K P is the Placement Officer. Contact: placement@pesce.ac.in, +91 94482 82589. Asst: Madhusudhan M S (+91 8970174797)."
+      },
+      {
+        "question": "What training programs are available?",
+        "answer": "Soft-skills, personality development, communication, aptitude, interview/GD, self-motivation, and pre-placement industry interactions."
       },
       {
         "question": "When does placement season start?",
-        "answer": "Campus placement drives primarily kick off at the very beginning of the 7th semester (final year)."
+        "answer": "Campus drives begin at the start of 7th semester (final year). Pre-placement internships available in 7th/8th semester."
       }
     ],
     "Hostel": [
       {
+        "question": "What are the hostel details?",
+        "answer": "Boys: 350 capacity (89 single + 21 double + 73 triple rooms), Warden: Dr. Srinivasa M R (+91 94482 82593). Girls: 371 capacity (67 double + 79 triple rooms), Warden: Shwetha M K (+91 94482 82595)."
+      },
+      {
+        "question": "What hostel facilities are available?",
+        "answer": "Free medical, library, TV room, Wi-Fi, solar water heaters, CCTV, playground, vehicle parking, and separate mess."
+      },
+      {
+        "question": "Who are the hostel wardens?",
+        "answer": "Boys Warden: Dr. Srinivasa M R (+91 94482 82593/9980329132). Girls Warden: Shwetha M K (+91 94482 82595). Boys Manager: Girish K P (+91 91413 36956). Girls Manager: Nanda (+91 95905 54700)."
+      },
+      {
         "question": "Are hostels mandatory?",
-        "answer": "No, staying in the college hostel is completely optional. Day scholars commute normally."
+        "answer": "No, hostels are optional. Day scholars can commute. Many PG/rental options exist near campus."
       },
       {
-        "question": "What's the cost?",
-        "answer": "Hostel costs combine an annual room rent along with monthly sliding mess bills depending on the food divided among students. Contact the wardens for precise current rates."
+        "question": "What's the hostel cost?",
+        "answer": "Annual room rent + monthly mess bills. Contact wardens for current rates or see hostel fee PDF on the website."
+      }
+    ],
+    "Facilities": [
+      {
+        "question": "What facilities does the campus have?",
+        "answer": "Library (13,099 sq ft), hostels, dispensary (24/7), canteen (250 capacity), sports complex (cricket, swimming, tennis), bank ATM, cooperative society, guest house, Wi-Fi, and 24/7 CCTV security."
       },
       {
-        "question": "What facilities are included?",
-        "answer": "Hostels include 24/7 security, medical emergency support via our dispensary, standard mess food (North & South Indian), and basic furniture."
+        "question": "Is there a medical facility?",
+        "answer": "Yes, campus dispensary with Dr. Nakul N Rao available 24/7 for emergencies."
       },
       {
-        "question": "Can I get outside accommodation?",
-        "answer": "Yes, many PG (Paying Guest) accommodations and rental options exist around the Mandya campus within walking distance."
+        "question": "Are there sports facilities?",
+        "answer": "Cricket stadium, swimming pool, tennis courts, and playground. Active sports activities throughout the year."
       },
       {
-        "question": "Who's the hostel warden?",
-        "answer": "For Boys: Dr. Srinivasa M R (+91 94482 82593). For Girls: Shwetha M K (+91 94482 82595)."
+        "question": "Is WiFi available?",
+        "answer": "Yes, Wi-Fi across academic blocks, central library, and hostel premises."
+      },
+      {
+        "question": "Is there a canteen?",
+        "answer": "Yes, canteen with 250 capacity serving South Indian and North Indian cuisine."
       }
     ],
     "General": [
       {
-        "question": "How do I contact college?",
-        "answer": "You can reach the main admission line at +91 94482 82588 or email admissions@pesce.ac.in."
+        "question": "How do I contact the college?",
+        "answer": "Admissions: +91 94482 82588 / admissions@pesce.ac.in. Principal Office: 08232 220043. Placements: placement@pesce.ac.in."
       },
       {
-        "question": "Where is the campus?",
-        "answer": "PES College of Engineering is completely situated in Mandya, Karnataka. It's easily accessible via the Bangalore-Mysore highway."
+        "question": "Where is PESCE located?",
+        "answer": "PES College of Engineering is in Mandya, Karnataka, on the Bangalore-Mysore highway. Easily accessible by road."
       },
       {
-        "question": "Are there sports facilities?",
-        "answer": "Yes! The campus boasts a massive cricket stadium, tennis courts, and a swimming pool."
+        "question": "Who is the principal?",
+        "answer": "The current principal is Dr. N.L. Murali Krishna. Vice Principal: Dr. Vinay S."
       },
       {
-        "question": "Is WiFi available?",
-        "answer": "Yes, Wi-Fi is actively available across academic blocks, the central library, and the hostel premises."
+        "question": "What is the college's NAAC grade?",
+        "answer": "PESCE holds NAAC A Grade accreditation and is NBA accredited."
+      },
+      {
+        "question": "Does PESCE have NSS?",
+        "answer": "Yes, PESCE has an active National Service Scheme (NSS) chapter for community service activities."
+      },
+      {
+        "question": "What professional bodies are active?",
+        "answer": "ISTE, IEEE, and CSI student chapters are active with regular technical events and workshops."
+      },
+      {
+        "question": "Is there student counselling?",
+        "answer": "Yes, Dr. Bindiya J (Psychiatrist, MIMS) serves as the Student Counsellor at PESCE."
       }
     ]
   }

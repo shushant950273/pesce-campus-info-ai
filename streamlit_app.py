@@ -211,26 +211,51 @@ def localize_response(response_text, category, lang):
 # QUERY MATCHER CLASS
 # ==========================================
 def format_answer(content, category):
-    if category == "academics":
-        programs = content.get("programs", [])
-        return f"**Academic Structure:** {content.get('structure')}\n\n**Semester:** {content.get('semester')}\n\n**Programs:** {', '.join(programs[:5])}... aur aur bhi"
+    if category == "college_overview":
+        return f"**{content.get('full_name', 'PESCE')}**\n\n🏫 Established: {content.get('established')}\n📍 {content.get('campus_location')}\n🏆 {', '.join(content.get('accreditations', [])[:3])}\n\n**Vision:** {content.get('vision', '')}\n\n👨‍🎓 {content.get('total_students', '')} Students | 📊 {content.get('total_placements', '')} Placements | 🎓 {content.get('phds_awarded', '')} PhDs"
+    elif category == "academics":
+        ug = content.get("undergraduate_programs", [])
+        programs = [p.get("name", "") for p in ug[:8]]
+        return f"**Academic Structure:** {content.get('structure')}\n\n**Exam Pattern:** {content.get('exam_pattern')}\n\n**UG Programs ({len(ug)}):** {', '.join(programs)}...\n\n**PG Programs:** {len(content.get('postgraduate_programs', []))} programs (M.Tech, MCA, MBA)\n\n**Branch Change:** {content.get('branch_change', 'N/A')}"
+    elif category == "departments":
+        parts = []
+        for dept_code, dept_data in content.items():
+            parts.append(f"**{dept_data.get('full_name', dept_code)}** (HOD: {dept_data.get('hod', 'N/A')})")
+            faculty = dept_data.get("faculty", [])
+            if faculty:
+                parts.append(f"  Faculty: {len(faculty)} members")
+        return "\n".join(parts)
     elif category == "placements":
+        team = content.get("placement_team", [])
+        team_str = ", ".join([f"{t['name']} ({t['role']})" for t in team[:4]])
         companies = content.get("top_companies", [])
-        return f"**Companies:** {', '.join(companies[:7])}\n\n**Total Companies:** {content.get('companies_visited')}\n\n**Placements:** {content.get('students_placed')}"
+        return f"**Placement Officer:** {content.get('placement_officer', 'N/A')}\n📧 {content.get('placement_email')}\n\n**Team:** {team_str}\n\n**Stats:** {content.get('companies_visited')} companies | {content.get('students_placed')} placed | {content.get('total_offers')} offers\n\n**Top Companies:** {', '.join(companies[:10])}"
     elif category == "facilities":
-        return "**Facilities:**\n- Library: 100 capacity\n- Boys Hostel: 350 capacity\n- Girls Hostel: 371 capacity\n- Medical: 24/7 emergency\n- Canteen: 250 students capacity"
+        bh = content.get("boys_hostel", {})
+        gh = content.get("girls_hostel", {})
+        return f"**Library:** {content.get('library', {}).get('area', 'N/A')}\n\n**Boys Hostel:** {bh.get('total_capacity', 'N/A')} capacity | Warden: {bh.get('warden', 'N/A')} ({bh.get('warden_phone', '')})\n\n**Girls Hostel:** {gh.get('total_inmates', 'N/A')} capacity | Warden: {gh.get('warden', 'N/A')} ({gh.get('warden_phone', '')})\n\n**Medical:** {content.get('dispensary', {}).get('medical_officer', 'N/A')} (24/7)\n\n**Canteen:** {content.get('canteen', {}).get('capacity', 'N/A')} capacity\n\n**Sports:** {', '.join(content.get('sports', {}).get('facilities', []))}"
     elif category == "administrative":
-        return f"**Admission Email:** admissions@pesce.ac.in\n**Phone:** +91 94482 82588\n\n**Documents:** SSLC, PUC, Aadhar, Transfer Certificate, aur aur..."
+        return f"**Principal:** {content.get('principal', 'N/A')}\n**Vice Principal:** {content.get('vice_principal', 'N/A')}\n\n📧 {content.get('admission_email')}\n📞 {content.get('admission_phone')}\n\n**Admission Codes:** " + ", ".join([f"{a['type']} ({a['code']})" for a in content.get("admission_types", [])])
+    elif category == "contacts":
+        lines = [f"**{k.replace('_', ' ').title()}:** {v}" for k, v in content.items()]
+        return "\n".join(lines)
+    elif category == "cells_and_committees":
+        return "\n".join([f"**{k.upper()}:** {v}" for k, v in content.items()])
     return str(content)
 
 class QueryMatcher:
     def __init__(self, data):
         self.data = data
         self.synonyms = {
-            "academics": ["branch", "department", "course", "program", "academic", "study", "syllabus", "engineering"],
-            "facilities": ["hostel", "dorm", "accommodation", "stay", "library", "canteen", "sports", "dispensary", "medical", "room", "facility"],
-            "placements": ["placement", "job", "recruitment", "hiring", "company", "companies", "offer", "package", "salary", "internship", "career"],
-            "administrative": ["fee", "tuition", "payment", "cost", "admission", "admin", "contact", "email", "phone", "document", "principal"]
+            "college_overview": ["about", "history", "pesce", "college", "vision", "mission", "established", "naac", "nba", "accreditation", "overview"],
+            "academics": ["branch", "department", "course", "program", "academic", "study", "syllabus", "engineering", "semester", "exam", "b.e.", "m.tech", "mca", "mba", "phd"],
+            "departments": ["cse", "ise", "ece", "eee", "mechanical", "civil", "aiml", "faculty", "hod", "professor", "teacher", "staff"],
+            "facilities": ["hostel", "dorm", "accommodation", "stay", "library", "canteen", "sports", "dispensary", "medical", "room", "facility", "wifi", "gym", "warden"],
+            "placements": ["placement", "job", "recruitment", "hiring", "company", "companies", "offer", "package", "salary", "internship", "career", "training"],
+            "administrative": ["fee", "tuition", "payment", "cost", "admission", "admin", "contact", "email", "phone", "document", "principal", "vice principal"],
+            "contacts": ["number", "call", "helpline", "reach", "address", "mobile"],
+            "cells_and_committees": ["nss", "iste", "ieee", "iqac", "grievance", "committee", "club", "cell"],
+            "faq": ["faq", "question", "doubt", "help", "how", "what", "where", "when", "who"]
         }
         self.vocab = [w for syns in self.synonyms.values() for w in syns] + list(self.synonyms.keys())
 
