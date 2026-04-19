@@ -40,31 +40,31 @@ DEPARTMENT_PAGES = {
     "machine learning": "/department-artificial-intelligence-machine-learning.php",
     "artificial intelligence": "/department-artificial-intelligence-machine-learning.php",
     "data science": "/department-data-science.php",
-    "ds": "/department-data-science.php",
+
     "csbs": "/dep-cs-business-system.php",
     "business system": "/dep-cs-business-system.php",
     "ece": "/dep-electrionics-communication-engg.php",
     "electronics communication": "/dep-electrionics-communication-engg.php",
-    "ec": "/dep-electrionics-communication-engg.php",
+
     "eee": "/dep-electrical-electronics-engg.php",
     "electrical": "/dep-electrical-electronics-engg.php",
-    "ee": "/dep-electrical-electronics-engg.php",
+
     "mechanical": "/dep-mechanical-engg.php",
     "mech": "/dep-mechanical-engg.php",
-    "me": "/dep-mechanical-engg.php",
+
     "civil": "/department-civil-engineering.php",
-    "ce": "/department-civil-engineering.php",
+
     "ise": "/dep-information-science-engg.php",
     "information science": "/dep-information-science-engg.php",
-    "is": "/dep-information-science-engg.php",
+
     "automobile": "/department-automobile-engineering.php",
     "auto": "/department-automobile-engineering.php",
-    "ae": "/department-automobile-engineering.php",
+
     "robotics": "/dep-robotics.php",
     "rai": "/dep-robotics.php",
     "industrial production": "/dep-industrial-production-engg.php",
     "ipe": "/dep-industrial-production-engg.php",
-    "ip": "/dep-industrial-production-engg.php",
+
     "vlsi": "/dep-electrionics-communication-engg-VLSI.php",
     "mba": "/dep-master-business-administration.php",
     "mca": "/dep-master-computer-application.php",
@@ -317,17 +317,42 @@ def _detect_department(query):
     """
     Check if the query is asking about a specific department.
     Returns (dept_keyword, dept_url_path) or (None, None).
+    
+    Uses word-boundary matching for short keywords (<=3 chars) to avoid
+    false positives like "is" matching the English word "is".
+    Prioritizes longer keyword matches for accuracy.
     """
     q = query.lower()
+    matches = []
+
     for keyword, path in DEPARTMENT_PAGES.items():
-        if keyword in q:
-            return keyword, path
-    # Fuzzy match
+        if len(keyword) <= 3:
+            # Short keywords: require word boundary match
+            # e.g., "ise" should match "ise department" but NOT "advise"
+            pattern = r'\b' + re.escape(keyword) + r'\b'
+            if re.search(pattern, q):
+                matches.append((keyword, path, len(keyword)))
+        else:
+            # Longer keywords: substring match is fine
+            if keyword in q:
+                matches.append((keyword, path, len(keyword)))
+
+    if matches:
+        # Prefer the longest keyword match for accuracy
+        matches.sort(key=lambda x: x[2], reverse=True)
+        return matches[0][0], matches[0][1]
+
+    # Fuzzy match (only for words >= 4 chars to avoid false positives)
     for word in q.split():
+        if len(word) < 4:
+            continue
         for keyword, path in DEPARTMENT_PAGES.items():
-            matches = difflib.get_close_matches(word, [keyword], n=1, cutoff=0.80)
-            if matches:
+            if len(keyword) < 4:
+                continue
+            fmatches = difflib.get_close_matches(word, [keyword], n=1, cutoff=0.80)
+            if fmatches:
                 return keyword, path
+
     return None, None
 
 
