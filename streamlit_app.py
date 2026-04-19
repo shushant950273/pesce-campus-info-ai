@@ -43,23 +43,23 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    /* Global Colors and Heading Fixes */
-    h1, h2, h3 {
-        color: #8B0000; /* Deep Red */
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Global Theme Overrides: Deep Red, Gold, White Theme */
+    .stApp {
+        background-color: #FAFAFA;
     }
     
-    @media (prefers-color-scheme: dark) {
-        h1, h2, h3 {
-            color: #FFD700; /* Gold headers in dark mode */
-        }
+    /* Global Colors and Heading Fixes */
+    h1, h2, h3 {
+        color: #8B0000 !important; /* Deep Red */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
     /* Sidebar Styling */
     [data-testid="stSidebar"] {
         background-color: #8B0000;
+        color: white;
     }
-    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] p, [data-testid="stSidebar"] label, [data-testid="stSidebar"] div {
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] p, [data-testid="stSidebar"] label {
         color: white !important;
     }
     
@@ -67,21 +67,15 @@ st.markdown("""
     .stButton>button {
         border-radius: 8px;
         border: 2px solid #FFD700;
-        background-color: transparent;
-        color: inherit;
+        background-color: white;
+        color: #8B0000;
         font-weight: 600;
         transition: all 0.2s ease-in-out;
     }
-    .stButton>button p {
-        color: inherit !important;
-    }
     .stButton>button:hover {
-        background-color: #FFD700 !important;
-        color: #8B0000 !important;
-        border-color: #FFD700 !important;
-    }
-    .stButton>button:hover p {
-        color: #8B0000 !important;
+        background-color: #FFD700;
+        color: #8B0000;
+        border-color: #8B0000;
     }
     
     /* Export Button specifically styling */
@@ -91,9 +85,6 @@ st.markdown("""
         background-color: #FFD700;
         color: #8B0000;
         font-weight: 800;
-    }
-    .stDownloadButton>button p {
-        color: #8B0000 !important;
     }
     
     /* Bottom Chat bar anchoring fix */
@@ -219,7 +210,7 @@ def localize_response(response_text, category, lang):
 # ==========================================
 # QUERY MATCHER CLASS
 # ==========================================
-def format_answer(content, category, query=""):
+def format_answer(content, category):
     if category == "college_overview":
         return f"**{content.get('full_name', 'PESCE')}**\n\n🏫 Established: {content.get('established')}\n📍 {content.get('campus_location')}\n🏆 {', '.join(content.get('accreditations', [])[:3])}\n\n**Vision:** {content.get('vision', '')}\n\n👨‍🎓 {content.get('total_students', '')} Students | 📊 {content.get('total_placements', '')} Placements | 🎓 {content.get('phds_awarded', '')} PhDs"
     elif category == "academics":
@@ -244,95 +235,60 @@ def format_answer(content, category, query=""):
         gh = content.get("girls_hostel", {})
         return f"**Library:** {content.get('library', {}).get('area', 'N/A')}\n\n**Boys Hostel:** {bh.get('total_capacity', 'N/A')} capacity | Warden: {bh.get('warden', 'N/A')} ({bh.get('warden_phone', '')})\n\n**Girls Hostel:** {gh.get('total_inmates', 'N/A')} capacity | Warden: {gh.get('warden', 'N/A')} ({gh.get('warden_phone', '')})\n\n**Medical:** {content.get('dispensary', {}).get('medical_officer', 'N/A')} (24/7)\n\n**Canteen:** {content.get('canteen', {}).get('capacity', 'N/A')} capacity\n\n**Sports:** {', '.join(content.get('sports', {}).get('facilities', []))}"
     elif category == "administrative":
-        docs = "\n- ".join(content.get("required_documents", []))
-        return f"**Principal:** {content.get('principal', 'N/A')}\n**Vice Principal:** {content.get('vice_principal', 'N/A')}\n\n📧 {content.get('admission_email')}\n📞 {content.get('admission_phone')}\n\n**Admission Codes:** " + ", ".join([f"{a['type']} ({a['code']})" for a in content.get("admission_types", [])]) + f"\n\n**Required Documents:**\n- {docs}"
+        return f"**Principal:** {content.get('principal', 'N/A')}\n**Vice Principal:** {content.get('vice_principal', 'N/A')}\n\n📧 {content.get('admission_email')}\n📞 {content.get('admission_phone')}\n\n**Admission Codes:** " + ", ".join([f"{a['type']} ({a['code']})" for a in content.get("admission_types", [])])
     elif category == "contacts":
         lines = [f"**{k.replace('_', ' ').title()}:** {v}" for k, v in content.items()]
         return "\n".join(lines)
     elif category == "cells_and_committees":
         return "\n".join([f"**{k.upper()}:** {v}" for k, v in content.items()])
-    elif category == "faq":
-        # Smart FAQ routing for offline fallback
-        best_qa = None
-        best_score = 0
-        stop_words = {"what", "are", "is", "the", "to", "how", "do", "i", "for"}
-        query_words = set([w.lower().strip("?,.!'\"") for w in query.split()]) - stop_words
-        
-        if query_words:
-            for section, qas in content.items():
-                for qa in qas:
-                    q_words = set([w.lower().strip("?,.!'\"") for w in qa['question'].split()])
-                    a_words = set([w.lower().strip("?,.!'\"") for w in qa['answer'].split()])
-                    overlap = len(query_words.intersection(q_words)) * 2 + len(query_words.intersection(a_words))
-                    if overlap > best_score:
-                        best_score = overlap
-                        best_qa = qa
-        
-        if best_score > 0 and best_qa:
-            return f"**Q:** {best_qa['question']}\n\n**A:** {best_qa['answer']}"
-            
-        # Default fallback
-        lines = ["**Frequently Asked Questions:**\n"]
-        for section, qas in content.items():
-            qa = qas[0]
-            lines.append(f"- **{qa.get('question', '')}**\n  {qa.get('answer', '')}")
-        return "\n".join(lines)
     return str(content)
 
 class QueryMatcher:
     def __init__(self, data):
         self.data = data
         self.synonyms = {
-            "college_overview": ["about", "history", "pesce", "college", "vision", "mission", "established", "naac", "nba", "accreditation", "overview", "location", "located"],
-            "academics": ["branch", "department", "course", "courses", "program", "programs", "academic", "study", "syllabus", "engineering", "semester", "exam", "b.e.", "m.tech", "mca", "mba", "phd", "class"],
-            "departments": ["cse", "ise", "ece", "eee", "mechanical", "civil", "aiml", "faculty", "hod", "professor", "teacher", "staff", "professors"],
-            "facilities": ["hostel", "dorm", "accommodation", "stay", "library", "canteen", "sports", "dispensary", "medical", "room", "facility", "wifi", "gym", "warden", "boys", "girls"],
+            "college_overview": ["about", "history", "pesce", "college", "vision", "mission", "established", "naac", "nba", "accreditation", "overview"],
+            "academics": ["branch", "department", "course", "program", "academic", "study", "syllabus", "engineering", "semester", "exam", "b.e.", "m.tech", "mca", "mba", "phd"],
+            "departments": ["cse", "ise", "ece", "eee", "mechanical", "civil", "aiml", "faculty", "hod", "professor", "teacher", "staff"],
+            "facilities": ["hostel", "dorm", "accommodation", "stay", "library", "canteen", "sports", "dispensary", "medical", "room", "facility", "wifi", "gym", "warden"],
             "placements": ["placement", "job", "recruitment", "hiring", "company", "companies", "offer", "package", "salary", "internship", "career", "training"],
             "administrative": ["fee", "tuition", "payment", "cost", "admission", "admin", "contact", "email", "phone", "document", "principal", "vice principal"],
             "contacts": ["number", "call", "helpline", "reach", "address", "mobile"],
             "cells_and_committees": ["nss", "iste", "ieee", "iqac", "grievance", "committee", "club", "cell"],
             "faq": ["faq", "question", "doubt", "help", "how", "what", "where", "when", "who"]
         }
-        self.stop_words = {"tell", "me", "about", "a", "an", "the", "in", "of", "to", "is", "it", "for", "and"}
+        self.vocab = [w for syns in self.synonyms.values() for w in syns] + list(self.synonyms.keys())
+
+    def correct_typo(self, word):
+        matches = difflib.get_close_matches(word.lower(), self.vocab, n=1, cutoff=0.7)
+        return matches[0] if matches else word.lower()
 
     def match(self, query):
         if not self.data: return None, None, 0.0
-        
-        query_lower = query.lower()
-        words = [w.strip("?,.!'\"") for w in query_lower.split()]
-        words = [w for w in words if w and w not in self.stop_words]
-        
+        corrected_words = [self.correct_typo(w) for w in query.lower().split()]
         scores = {cat: 0.0 for cat in self.data.keys()}
         
-        # Check for multi-word synonyms first (e.g. "vice principal")
-        for cat, syns in self.synonyms.items():
-            for syn in syns:
-                if " " in syn and syn in query_lower:
-                    scores[cat] += 1.0
-        
-        # Check single words
-        for word in words:
-            for cat, syns in self.synonyms.items():
-                if word == cat: 
-                    scores[cat] += 1.0 
-                elif word in syns: 
-                    scores[cat] += 0.8
+        for word in corrected_words:
+            for cat, content in self.data.items():
+                if word == cat: scores[cat] += 1.0 
+                elif word in self.synonyms.get(cat, []): scores[cat] += 0.8
+                elif word in str(content).lower(): scores[cat] += 0.2
                     
-        # Find the single best category based on raw scores
-        best_cat = None
-        best_score = 0.0
-        for cat, score in scores.items():
-            if score > best_score:
-                best_score = score
-                best_cat = cat
-                
-        if best_score >= 0.8 and best_cat:
-            content = dict(self.data[best_cat])
-            if best_cat == "placements" and any(cw in ["cse", "cs", "computer"] for cw in words):
+        results = [
+            {"category": cat, "content": self.data[cat], "confidence": min(score, 1.0)}
+            for cat, score in scores.items() if min(score, 1.0) > 0.6
+        ]
+        results.sort(key=lambda x: x["confidence"], reverse=True)
+        if not results: return None, None, 0.0
+        best_conf = results[0]["confidence"]
+        
+        if len(results) > 1:
+            return {r["category"]: r["content"] for r in results}, [r["category"] for r in results], best_conf
+        else:
+            cat, content = results[0]["category"], dict(results[0]["content"])
+            if cat == "placements" and any(cw in ["cse", "cs", "computer"] for cw in corrected_words):
                 content["filter_note"] = "💡 Note: Placements listed are overall numbers (includes CSE specific data)."
-            return content, best_cat, min(best_score, 1.0)
-            
-        return None, None, 0.0
+            return content, cat, best_conf
 
 def find_answer(query):
     """
@@ -398,8 +354,8 @@ def find_answer(query):
     # --- STEP 5: Offline Fallback (template-based) ---
     if keyword_result and keyword_category:
         if isinstance(keyword_category, list):
-            return "\n\n---\n\n".join([format_answer(keyword_result[c], c, query) for c in keyword_category]), "Multiple"
-        return format_answer(keyword_result, keyword_category, query), keyword_category
+            return "\n\n---\n\n".join([format_answer(keyword_result[c], c) for c in keyword_category]), "Multiple"
+        return format_answer(keyword_result, keyword_category), keyword_category
 
     if scraped_text:
         return f"🌐 **Live from PESCE Website:**\n\n{scraped_text}", "Web Search"

@@ -29,8 +29,8 @@ class SemanticSearcher:
         """Translates basic JSON parameters into rich semantic paragraphs for the transformer to map meaning."""
         for category, content in self.data.items():
             if category == "academics":
-                ug_progs = ", ".join([p.get("name", "") for p in content.get("undergraduate_programs", [])])
-                fact = f"Academics, education, learning, and studies. We offer a {content.get('structure')} program. Engineering branches, departments, and streams taught include: {ug_progs}. We heavily teach Artificial Intelligence, Machine Learning (AI & ML), CSE, engineering sciences. Semester division is {content.get('semester_schedule', {}).get('odd', '')}. Exam grading pattern is {content.get('exam_pattern')}."
+                progs = ", ".join(content.get("programs", []))
+                fact = f"Academics, education, learning, and studies. We offer a {content.get('structure')} program. Engineering branches, departments, and streams taught include: {progs}. We heavily teach Artificial Intelligence, Machine Learning (AI & ML), CSE, engineering sciences. Semester division is {content.get('semester')}. Exam grading pattern is {content.get('exam_pattern')}."
                 self.corpus.append(fact)
                 self.corpus_keys.append("academics")
 
@@ -41,21 +41,16 @@ class SemanticSearcher:
                 self.corpus_keys.append("placements")
                 
             elif category == "facilities":
-                fact = f"Campus facility, infrastructure, living, sleeping, eating, health, and campus life. Library size: {content.get('library', {}).get('area', '')}. Boys hostel and girls hostel dormitory accommodation for staying and sleeping. Boys capacity: {content.get('boys_hostel', {}).get('total_capacity')}. Girls capacity: {content.get('girls_hostel', {}).get('total_inmates')}. Medical dispensary and doctor available. Food canteen. Sports grounds including {', '.join(content.get('sports', {}).get('facilities', []))}."
+                fact = f"Campus facility, infrastructure, living, sleeping, eating, health, and campus life. Library size: {content.get('library')}. Boys hostel and girls hostel dormitory accommodation for staying and sleeping (Capacities: {content.get('boys_hostel').split(',')[0]} and {content.get('girls_hostel').split(',')[0]}). Medical dispensary and doctor available. Food canteen. Sports grounds including {content.get('sports')}."
                 self.corpus.append(fact)
                 self.corpus_keys.append("facilities")
                 
             elif category == "administrative":
-                types = ", ".join([a.get('type', '') for a in content.get("admission_types", [])])
+                types = ", ".join(content.get("admission_types", []))
                 docs = ", ".join(content.get("required_documents", []))
                 fact = f"Administrative, rules, contact, phone numbers, email, principal, management, cost, and payment. Admission types accepted are {types}. Principal name is {content.get('principal')}. Admission contact email is {content.get('admission_email')} and phone is {content.get('admission_phone')}. Required documents for entry: {docs}."
                 self.corpus.append(fact)
                 self.corpus_keys.append("administrative")
-            
-            elif category == "faq":
-                fact = "Frequently asked questions, doubts, queries, help, what, where, when, how. Covers admissions, academics, placements, hostels, and general campus facilities."
-                self.corpus.append(fact)
-                self.corpus_keys.append("faq")
                 
     def _get_cached_embeddings(self):
         # We process this string array into mathematically mapped numerical tensors!
