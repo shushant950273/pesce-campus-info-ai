@@ -25,6 +25,12 @@ try:
 except ImportError:
     HAS_SCRAPER = False
 
+try:
+    from ai_engine import generate_ai_response, search_serpapi, build_context
+    HAS_AI_ENGINE = True
+except ImportError:
+    HAS_AI_ENGINE = False
+
 # ==========================================
 # PAGE CONFIG & STYLING
 # ==========================================
@@ -260,36 +266,74 @@ class QueryMatcher:
             return content, cat, best_conf
 
 def find_answer(query):
-    # 1. ATTEMPT SEMANTIC SEARCH (Meaning-based precision)
+    """
+    Master answer pipeline (5 tiers):
+      1. Gather context from semantic search
+      2. Gather context from keyword search
+      3. Gather context from web scraping (pesce.ac.in)
+      4. Feed ALL context to AI Engine (Groq → Gemini) for natural response
+      5. Offline fallback: template-based answers if LLMs are unavailable
+    """
+    semantic_result = None
+    keyword_result = None
+    keyword_category = None
+    scraped_text = None
+
+    # --- STEP 1: Semantic Search (gather context) ---
     if SemanticSearcher is not None:
         try:
             semantic_engine = SemanticSearcher(PESCE_DATA)
-            semantic_ans, sem_cat, sem_confidence = semantic_engine.search(query, threshold=0.50)
-            
-            if semantic_ans and sem_confidence > 0.50:
-                print(f"Semantic model hit with confidence: {sem_confidence}")
-                return format_answer(semantic_ans, sem_cat), sem_cat
+            sem_ans, sem_cat, sem_conf = semantic_engine.search(query, threshold=0.40)
+            if sem_ans and sem_conf > 0.40:
+                semantic_result = sem_ans
+                keyword_category = sem_cat
+                print(f"[Pipeline] Semantic hit: {sem_cat} ({sem_conf:.2f})")
         except Exception as e:
-            print("Semantic Engine failure:", e)
+            print(f"[Pipeline] Semantic failure: {e}")
 
-    # 2. FALLBACK TO KEYWORD SEARCH
+    # --- STEP 2: Keyword Search (gather context) ---
     matcher = QueryMatcher(PESCE_DATA)
     answer_data, category, confidence = matcher.match(query)
-    if confidence > 0.6 and answer_data:
-        if isinstance(category, list):
-            return "\n\n---\n\n".join([format_answer(answer_data[c], c) for c in category]), "Multiple"
-        return format_answer(answer_data, category), category
+    if confidence > 0.5 and answer_data:
+        keyword_result = answer_data
+        if not keyword_category:
+            keyword_category = category
+        print(f"[Pipeline] Keyword hit: {category} ({confidence:.2f})")
 
-    # 3. FALLBACK TO WEB SCRAPING (Live search from pesce.ac.in)
+    # --- STEP 3: Web Scraping (gather context) ---
     if HAS_SCRAPER:
         try:
             scraper = PESCEScraper()
-            scraped_text, source_label = scraper.search(query)
-            if scraped_text:
-                answer = f"🌐 **Live from PESCE Website:**\n\n{scraped_text}\n\n---\n*Source: {source_label}*"
-                return answer, "Web Search"
+            scraped, _ = scraper.search(query)
+            if scraped:
+                scraped_text = scraped
+                print(f"[Pipeline] Web scrape: {len(scraped)} chars")
         except Exception as e:
-            print(f"Web Scraper failure: {e}")
+            print(f"[Pipeline] Web scraper failure: {e}")
+
+    # --- STEP 4: AI Engine (Groq → Gemini) ---
+    if HAS_AI_ENGINE:
+        try:
+            ai_response, ai_source = generate_ai_response(
+                query=query,
+                json_data=PESCE_DATA,
+                semantic_result=semantic_result,
+                scraped_text=scraped_text,
+                lang=st.session_state.get('language', 'English')
+            )
+            if ai_response:
+                return ai_response, ai_source
+        except Exception as e:
+            print(f"[Pipeline] AI Engine failure: {e}")
+
+    # --- STEP 5: Offline Fallback (template-based) ---
+    if keyword_result and keyword_category:
+        if isinstance(keyword_category, list):
+            return "\n\n---\n\n".join([format_answer(keyword_result[c], c) for c in keyword_category]), "Multiple"
+        return format_answer(keyword_result, keyword_category), keyword_category
+
+    if scraped_text:
+        return f"🌐 **Live from PESCE Website:**\n\n{scraped_text}", "Web Search"
 
     return "Mujhe is baare mein info nahi hai. Puchho: Academics, Placements, Facilities, ya Admin ke baare mein.", "General"
 
