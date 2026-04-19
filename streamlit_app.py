@@ -1,82 +1,479 @@
 import streamlit as st
+import json
+import sqlite3
+import pandas as pd
+from datetime import datetime
+import difflib
+import re
 import time
 
+try:
+    from deep_translator import GoogleTranslator
+    HAS_TRANSLATOR = True
+except ImportError:
+    HAS_TRANSLATOR = False
+
+from admin_dashboard import render_admin_dashboard
+try:
+    from semantic_matcher import SemanticSearcher
+except ImportError:
+    SemanticSearcher = None
+
+# ==========================================
+# PAGE CONFIG & STYLING
+# ==========================================
 st.set_page_config(
-    page_title="PESCE Campus Info AI",
+    page_title="PESCE Campus Info AI 🎓",
     page_icon="🎓",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-def build_sidebar():
-    with st.sidebar:
-        st.title("🎓 PESCE Mandya AI")
-        st.write("Welcome to the Interactive Campus Info AI Agent.")
-        
-        st.subheader("Filter by Category")
-        category = st.selectbox(
-            "Select Category",
-            ["All", "Academics", "Placements", "Facilities", "Clubs", "Administrative"]
+st.markdown("""
+<style>
+    /* Global Theme Overrides: Deep Red, Gold, White Theme */
+    .stApp {
+        background-color: #FAFAFA;
+    }
+    
+    /* Global Colors and Heading Fixes */
+    h1, h2, h3 {
+        color: #8B0000 !important; /* Deep Red */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Sidebar Styling */
+    [data-testid="stSidebar"] {
+        background-color: #8B0000;
+        color: white;
+    }
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3, [data-testid="stSidebar"] p, [data-testid="stSidebar"] label {
+        color: white !important;
+    }
+    
+    /* Primary Outline Buttons */
+    .stButton>button {
+        border-radius: 8px;
+        border: 2px solid #FFD700;
+        background-color: white;
+        color: #8B0000;
+        font-weight: 600;
+        transition: all 0.2s ease-in-out;
+    }
+    .stButton>button:hover {
+        background-color: #FFD700;
+        color: #8B0000;
+        border-color: #8B0000;
+    }
+    
+    /* Export Button specifically styling */
+    .stDownloadButton>button {
+        border-radius: 8px;
+        border: 2px solid #FFD700;
+        background-color: #FFD700;
+        color: #8B0000;
+        font-weight: 800;
+    }
+    
+    /* Bottom Chat bar anchoring fix */
+    [data-testid="stChatInput"] {
+        padding-bottom: 20px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
+# ==========================================
+# DB SETUP & FUNCTIONS
+# ==========================================
+DB_NAME = "pesce_chat.db"
+
+def init_db():
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS conversations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp DATETIME,
+            user_message TEXT,
+            bot_response TEXT,
+            category TEXT,
+            user_satisfaction INTEGER,
+            feedback_text TEXT,
+            issue_type TEXT
         )
-        
-        st.divider()
-        st.markdown("**Powered by LangChain & Streamlit**")
-    return category
+    ''')
+    # Backward compatibility with existing DB
+    try:
+        c.execute("ALTER TABLE conversations ADD COLUMN feedback_text TEXT")
+        c.execute("ALTER TABLE conversations ADD COLUMN issue_type TEXT")
+    except sqlite3.OperationalError:
+        pass
+    conn.commit()
+    conn.close()
 
-def build_main_ui():
-    st.header("Interactive Campus Info AI Agent")
-    st.write("Ask anything about PESCE Mandya!")
-    
-    tab1, tab2 = st.tabs(["Chat", "Popular Queries & FAQ"])
-    
-    with tab1:
-        display_chat_interface()
-        
-    with tab2:
-        st.subheader("Popular Queries")
-        st.button("What are the placement statistics for CS?")
-        st.button("Where is the library located and what are the timings?")
-        st.button("How do I apply for hostel accommodation?")
-        st.button("What clubs are available for extracurriculars?")
+def save_conversation(user_message, bot_response, category):
+    try:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
+        c.execute('INSERT INTO conversations (timestamp, user_message, bot_response, category) VALUES (?, ?, ?, ?)', 
+                 (timestamp, user_message, bot_response, str(category)))
+        msg_id = c.lastrowid
+        conn.commit()
+        conn.close()
+        return msg_id
+    except Exception:
+        return None
 
-def display_chat_interface():
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+def add_feedback(msg_id, rating=None, text=None, issue=None):
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        c = conn.cursor()
+        if rating is not None:
+             c.execute('UPDATE conversations SET user_satisfaction = ? WHERE id = ?', (rating, msg_id))
+        if text is not None:
+             c.execute('UPDATE conversations SET feedback_text = ? WHERE id = ?', (text, msg_id))
+        if issue is not None:
+             c.execute('UPDATE conversations SET issue_type = ? WHERE id = ?', (issue, msg_id))
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
 
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+# Removed get_stats() as it is now securely managed by admin_dashboard.py
 
-    if prompt := st.chat_input("Ask a question about PESCE..."):
-        st.chat_message("user").markdown(prompt)
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        
-        sample_responses = {
-            "placement": "PESCE Mandya has an active placement cell. Top recruiters include TCS, Infosys, and Wipro.",
-            "academics": "PESCE offers numerous undergraduate and postgraduate courses affiliated with VTU.",
-            "hostel": "The campus has separate hostel facilities for boys and girls.",
-            "hello": "Hello! How can I help you regarding PESCE Mandya today?"
+init_db()
+
+# ==========================================
+# DATA LOADING
+# ==========================================
+@st.cache_resource
+def load_data():
+    try:
+        with open("pesce_data.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+PESCE_DATA = load_data()
+
+
+# ==========================================
+# TRANSLATION DICTIONARY (Headers & Fallback)
+# ==========================================
+LANG_DICT = {
+    "English": {
+        "Academics": "Academics", "Placements": "Placements", "Facilities": "Facilities", "Administrative": "Administrative", "Hostel": "Hostel", "Admission": "Admission",
+        "fallback": "Mujhe is baare mein info nahi hai. Puchho: Academics, Placements, Facilities, ya Admin ke baare mein."
+    },
+    "Hindi": {
+        "Academics": "शिक्षा", "Placements": "नियोजन", "Facilities": "सुविधाएं", "Administrative": "प्रशासनिक", "Hostel": "छात्रावास", "Admission": "प्रवेश",
+        "fallback": "मुझे इस बारे में जानकारी नहीं है। कृपया शिक्षा, नियोजन, सुविधाओं या प्रवेश के बारे में पूछें।"
+    },
+    "Kannada": {
+        "Academics": "ಶಿಕ್ಷಣ", "Placements": "ನೇಮಕಾತಿ", "Facilities": "ಸೌಲಭ್ಯಗಳು", "Administrative": "ಆಡಳಿತಾತ್ಮಕ", "Hostel": "ವಸತಿಗೃಹ", "Admission": "ಪ್ರವೇಶ",
+        "fallback": "ನನಗೆ ಇದರ ಬಗ್ಗೆ ಮಾಹಿತಿ ಇಲ್ಲ. ಶಿಕ್ಷಣ, ನೇಮಕಾತಿ, ಸೌಲಭ್ಯಗಳು, ಅಥವಾ ಪ್ರವೇಶದ ಬಗ್ಗೆ ಕೇಳಿ."
+    }
+}
+
+def auto_detect_language(text):
+    if re.search(r'[\u0C80-\u0CFF]', text): return "Kannada"
+    elif re.search(r'[\u0900-\u097F]', text): return "Hindi"
+    return None 
+
+def localize_response(response_text, category, lang):
+    if lang == "English": return response_text
+    if "Mujhe is baare mein" in response_text or "No info" in response_text: return LANG_DICT[lang].get("fallback", response_text)
+    if HAS_TRANSLATOR:
+        lang_code = "hi" if lang == "Hindi" else "kn"
+        try: return GoogleTranslator(source='auto', target=lang_code).translate(response_text)
+        except Exception: pass 
+            
+    localized_text = response_text
+    for en_word, translated_word in LANG_DICT[lang].items():
+        pattern = re.compile(re.escape(en_word), re.IGNORECASE)
+        localized_text = pattern.sub(translated_word, localized_text)
+    return localized_text
+
+# ==========================================
+# QUERY MATCHER CLASS
+# ==========================================
+def format_answer(content, category):
+    if category == "academics":
+        programs = content.get("programs", [])
+        return f"**Academic Structure:** {content.get('structure')}\n\n**Semester:** {content.get('semester')}\n\n**Programs:** {', '.join(programs[:5])}... aur aur bhi"
+    elif category == "placements":
+        companies = content.get("top_companies", [])
+        return f"**Companies:** {', '.join(companies[:7])}\n\n**Total Companies:** {content.get('companies_visited')}\n\n**Placements:** {content.get('students_placed')}"
+    elif category == "facilities":
+        return "**Facilities:**\n- Library: 100 capacity\n- Boys Hostel: 350 capacity\n- Girls Hostel: 371 capacity\n- Medical: 24/7 emergency\n- Canteen: 250 students capacity"
+    elif category == "administrative":
+        return f"**Admission Email:** admissions@pesce.ac.in\n**Phone:** +91 94482 82588\n\n**Documents:** SSLC, PUC, Aadhar, Transfer Certificate, aur aur..."
+    return str(content)
+
+class QueryMatcher:
+    def __init__(self, data):
+        self.data = data
+        self.synonyms = {
+            "academics": ["branch", "department", "course", "program", "academic", "study", "syllabus", "engineering"],
+            "facilities": ["hostel", "dorm", "accommodation", "stay", "library", "canteen", "sports", "dispensary", "medical", "room", "facility"],
+            "placements": ["placement", "job", "recruitment", "hiring", "company", "companies", "offer", "package", "salary", "internship", "career"],
+            "administrative": ["fee", "tuition", "payment", "cost", "admission", "admin", "contact", "email", "phone", "document", "principal"]
         }
+        self.vocab = [w for syns in self.synonyms.values() for w in syns] + list(self.synonyms.keys())
+
+    def correct_typo(self, word):
+        matches = difflib.get_close_matches(word.lower(), self.vocab, n=1, cutoff=0.7)
+        return matches[0] if matches else word.lower()
+
+    def match(self, query):
+        if not self.data: return None, None, 0.0
+        corrected_words = [self.correct_typo(w) for w in query.lower().split()]
+        scores = {cat: 0.0 for cat in self.data.keys()}
         
-        def fallback_response(query):
-            query = query.lower()
-            for key, val in sample_responses.items():
-                if key in query:
-                    return val
-            return "Based on the internal knowledge, I couldn't find an exact answer. Please refer to https://pesce.ac.in/."
+        for word in corrected_words:
+            for cat, content in self.data.items():
+                if word == cat: scores[cat] += 1.0 
+                elif word in self.synonyms.get(cat, []): scores[cat] += 0.8
+                elif word in str(content).lower(): scores[cat] += 0.2
+                    
+        results = [
+            {"category": cat, "content": self.data[cat], "confidence": min(score, 1.0)}
+            for cat, score in scores.items() if min(score, 1.0) > 0.6
+        ]
+        results.sort(key=lambda x: x["confidence"], reverse=True)
+        if not results: return None, None, 0.0
+        best_conf = results[0]["confidence"]
+        
+        if len(results) > 1:
+            return {r["category"]: r["content"] for r in results}, [r["category"] for r in results], best_conf
+        else:
+            cat, content = results[0]["category"], dict(results[0]["content"])
+            if cat == "placements" and any(cw in ["cse", "cs", "computer"] for cw in corrected_words):
+                content["filter_note"] = "💡 Note: Placements listed are overall numbers (includes CSE specific data)."
+            return content, cat, best_conf
 
-        with st.chat_message("assistant"):
-            message_placeholder = st.empty()
-            full_response = ""
+def find_answer(query):
+    # 1. ATTEMPT SEMANTIC SEARCH (Meaning-based precision)
+    if SemanticSearcher is not None:
+        try:
+            semantic_engine = SemanticSearcher(PESCE_DATA)
+            semantic_ans, sem_cat, sem_confidence = semantic_engine.search(query, threshold=0.50)
             
-            response = fallback_response(prompt)
-            for chunk in response.split():
-                full_response += chunk + " "
-                time.sleep(0.05)
-                message_placeholder.markdown(full_response + "▌")
-            message_placeholder.markdown(full_response)
-            
-        st.session_state.messages.append({"role": "assistant", "content": full_response})
+            if semantic_ans and sem_confidence > 0.50:
+                print(f"Semantic model hit with confidence: {sem_confidence}")
+                return format_answer(semantic_ans, sem_cat), sem_cat
+        except Exception as e:
+            print("Semantic Engine failure:", e)
 
-if __name__ == "__main__":
-    selected_category = build_sidebar()
-    build_main_ui()
+    # 2. FALLBACK TO KEYWORD SEARCH
+    matcher = QueryMatcher(PESCE_DATA)
+    answer_data, category, confidence = matcher.match(query)
+    if confidence > 0.6 and answer_data:
+        if isinstance(category, list):
+            return "\n\n---\n\n".join([format_answer(answer_data[c], c) for c in category]), "Multiple"
+        return format_answer(answer_data, category), category
+    return "Mujhe is baare mein info nahi hai. Puchho: Academics, Placements, Facilities, ya Admin ke baare mein.", "General"
+
+
+# ==========================================
+# UI STATE MANAGEMENT
+# ==========================================
+if 'language' not in st.session_state: st.session_state.language = "English"
+if 'last_msg_id' not in st.session_state: st.session_state.last_msg_id = None
+if 'messages' not in st.session_state: st.session_state.messages = []
+if 'quick_submit' not in st.session_state: st.session_state.quick_submit = None
+
+# ==========================================
+# SIDEBAR UI
+# ==========================================
+with st.sidebar:
+    st.markdown("<h2 style='text-align: center; font-size:2em;'>🎓 PESCE AI</h2>", unsafe_allow_html=True)
+    st.write("Interactive Campus Knowledge Bot")
+    
+    st.markdown("---")
+    st.header("⚙️ Session Options")
+    if st.button("🗑️ New Chat", width='stretch'):
+        st.session_state.messages = []
+        st.session_state.last_msg_id = None
+        st.rerun()
+        
+    # Export Chat
+    chat_raw = f"PESCE Campus Chat Log\nGenerated: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n=====================\n\n"
+    for m in st.session_state.messages:
+        role = "USER" if m["role"] == "user" else "PESCE BOT"
+        chat_raw += f"[{role}]:\n{m['content']}\n\n"
+    st.download_button("📥 Export Chat (TXT)", data=chat_raw, file_name="PESCE_Chat_Log.txt", width='stretch')
+    
+    st.markdown("---")
+    st.header("🌐 Language Settings")
+    selected_lang = st.selectbox(
+        label="Select / चुनें / ಆರಿಸಿ",
+        options=["English", "Hindi", "Kannada"],
+        index=["English", "Hindi", "Kannada"].index(st.session_state.language),
+        label_visibility="hidden"
+    )
+    if selected_lang != st.session_state.language:
+        st.session_state.language = selected_lang
+        st.rerun()
+
+    st.markdown("---")
+    if st.toggle("📊 Analytics/Admin"):
+        st.session_state.view_admin = True
+    else:
+        st.session_state.view_admin = False
+
+# ==========================================
+# MAIN CHAT UI
+# ==========================================
+st.markdown("<h1 style='text-align: center; color: #8B0000; padding-bottom: 2rem;'>🎓 PESCE Campus Information AI</h1>", unsafe_allow_html=True)
+
+# 0. FAQ PopOut Logic
+@st.dialog("📚 Complete PESCE College FAQ")
+def render_faq_dialog():
+    if "faq" in PESCE_DATA:
+        st.caption("Browse all formally categorized institutional policies below.")
+        # Process each Dictionary key cleanly
+        for section, questions in PESCE_DATA["faq"].items():
+            st.markdown(f"#### {section} Level Policies")
+            for item in questions:
+                with st.expander(f"Q: {item['question']}"):
+                    st.write(f"**A:** {item['answer']}")
+            st.write("") # Margin padding
+    else:
+        st.warning("FAQ Data is currently unavailable.")
+
+# Place the Trigger Button directly underneath your Main Chat Header
+colA, colB, colC = st.columns([1, 2, 1])
+with colB:
+    if st.button("📖 Browse PESCE Complete FAQ Reference", width='stretch', type="primary"):
+        render_faq_dialog()
+st.write("") # Spacing padding before generic Start Screen options
+
+# 1. Start Screen / Quick Action Buttons
+if len(st.session_state.messages) == 0:
+    st.markdown("""
+        <div style="background-color: white; padding: 20px; border-radius: 10px; border-left: 5px solid #FFD700; margin-bottom: 30px; box-shadow: 0px 4px 6px rgba(0,0,0,0.05);">
+            <h4 style="color: #333 !important; font-weight: normal; margin-top: 0;">Welcome! Click a topic below or send your own message to begin.</h4>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("📚 Programs Offered", width='stretch'): st.session_state.quick_submit = "Tell me about programs offered"
+        if st.button("💼 Placement Statistics", width='stretch'): st.session_state.quick_submit = "Placement statistics and top companies"
+    with col2:
+        if st.button("🏛️ Admission Process", width='stretch'): st.session_state.quick_submit = "Admission process and required documents"
+        if st.button("🏠 Hostel Details", width='stretch'): st.session_state.quick_submit = "Give me boys and girls hostel details"
+    with col3:
+        if st.button("📞 Contact Information", width='stretch'): st.session_state.quick_submit = "What is the contact information and phone number?"
+        if st.button("📖 Campus Facilities", width='stretch'): st.session_state.quick_submit = "Library, canteen, and sports facilities"
+
+# 2. Render Existing Chat Log
+for message in st.session_state.messages:
+    avatar_emoji = "👤" if message["role"] == "user" else "🤖"
+    with st.chat_message(message["role"], avatar=avatar_emoji):
+        st.markdown(message["content"])
+        if message.get("source"):
+            st.caption(f"📌 Source: {message['source']} Section")
+
+# 3. Handle Input Processing Loop
+prompt = st.chat_input("Ask me about PESCE (e.g., 'Does the college have a pool?')")
+
+# Intercept Quick Action button
+if st.session_state.quick_submit:
+    prompt = st.session_state.quick_submit
+    st.session_state.quick_submit = None
+
+if prompt:
+    # Append & Draw User Message
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user", avatar="👤"):
+        st.markdown(prompt)
+
+    # Detect Auto-Lang
+    detected_lang = auto_detect_language(prompt)
+    if detected_lang and detected_lang != st.session_state.language:
+        st.session_state.language = detected_lang
+        st.toast(f"Swapped to {detected_lang} automatically!", icon="🌐")
+
+    # Spinner Delay & Bot Response Execution
+    with st.chat_message("assistant", avatar="🤖"):
+        with st.spinner("🧠 Gathering data from college records..."):
+            time.sleep(0.8) # Slight natural delay for UX immersion
+            
+            answer, category = find_answer(prompt)
+            localized_answer = localize_response(answer, category, st.session_state.language)
+            source_cat = "Multiple Matches" if isinstance(category, list) else str(category).capitalize()
+            
+            st.markdown(localized_answer)
+            st.caption(f"📌 Source: {source_cat} Section")
+            
+            # Formally write array & save DB row
+            msg_id = save_conversation(prompt, localized_answer, category)
+            st.session_state.last_msg_id = msg_id
+            st.session_state.messages.append({"role": "assistant", "content": localized_answer, "source": source_cat})
+            
+    # Forces UI refresh to ensure interactive Feedback component loads reliably underneath msg
+    st.rerun()
+
+# 4. Interactive Feedback Collection
+if 'current_rating' not in st.session_state:
+    st.session_state.current_rating = None
+
+if st.session_state.last_msg_id:
+    st.write("")
+    st.markdown("---")
+    
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        st.write("💡 **Was this helpful?**")
+        # Star Widget natively supports 0-4 mapping
+        feedback = st.feedback("stars")
+        
+        # Capture raw rating
+        if feedback is not None and st.session_state.current_rating is None:
+             st.session_state.current_rating = feedback + 1
+             add_feedback(st.session_state.last_msg_id, rating=st.session_state.current_rating)
+             st.rerun()
+             
+    with col2:
+         with st.popover("🤷 Didn't find what you wanted?"):
+             st.write("**Let Admissions Help!**")
+             st.markdown("📧 [Email Admissions](mailto:admissions@pesce.ac.in)")
+             st.markdown("📞 [Call Us](tel:+919448282588)")
+
+    # Expand Optional Feedback Options if deeply unsatisfied (1-3 Stars)
+    if st.session_state.current_rating is not None:
+        if st.session_state.current_rating < 4:
+            with st.container(border=True):
+                st.warning("We're sorry it wasn't perfect. Tell us why!")
+                
+                # Issue Reporting
+                issue = st.radio("What went wrong?", ["Information wrong", "Not helpful", "Too slow", "Want more detail", "Other"], horizontal=True)
+                
+                # Feedback Text
+                f_text = st.text_input("What could be better? (Optional)")
+                
+                # Follow-Up Logic for severely bad responses
+                if st.session_state.current_rating <= 2:
+                    st.info("We'll aggressively improve this. Would you like to chat with admin directly for a solution?")
+                    
+                if st.button("📥 Submit Detailed Feedback", type="primary"):
+                    add_feedback(st.session_state.last_msg_id, text=f_text, issue=issue)
+                    st.success("Thanks for feedback! ❤️")
+                    time.sleep(1.5)
+                    st.session_state.last_msg_id = None
+                    st.session_state.current_rating = None
+                    st.rerun()
+        else:
+             # Fast-pass success for 4-5 stars
+             st.success("Thanks for feedback! ❤️")
+             time.sleep(1.5)
+             st.session_state.last_msg_id = None
+             st.session_state.current_rating = None
+             st.rerun()
+
+if st.session_state.get('view_admin', False):
+    render_admin_dashboard()

@@ -1,7 +1,5 @@
-streamlit
-python-dotenv
-langchain
-google-generativeai
-PyPDF2
-beautifulsoup4
-requests
+streamlit>=1.35.0
+pandas>=2.0.0
+deep-translator>=1.11.4
+sentence-transformers>=2.2.2
+torch>=2.0.0

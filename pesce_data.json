@@ -1,87 +1,173 @@
 {
   "academics": {
-    "structure": "4 years (Bachelor of Engineering)",
-    "semester": "Odd Semester: September to February | Even Semester: February to July",
-    "exam_pattern": "Continuous Evaluation (CIE) - 50 marks + Final Exam (SEE) - 50 marks",
+    "structure": "4 years B.E. program",
+    "semester": "Odd (Sep-Feb), Even (Feb-Jul)",
     "programs": [
-      "Computer Science & Engineering",
-      "Computer Science & Engineering (AI & ML)",
-      "Computer Science & Engineering (Data Science)",
       "Civil Engineering",
-      "Automobile Engineering",
-      "Electronics & Communication Engineering",
-      "Electrical & Electronics Engineering",
       "Mechanical Engineering",
-      "Information Science & Engineering",
-      "Robotics and Artificial Intelligence Engineering"
-    ]
+      "Electrical and Electronics Engineering",
+      "Electronics and Communication Engineering",
+      "Industrial and Production Engineering",
+      "Computer Science and Engineering",
+      "Information Science and Engineering",
+      "Automobile Engineering",
+      "Artificial Intelligence and Machine Learning",
+      "Computer Science and Business Systems",
+      "Electronics and Instrumentation Engineering"
+    ],
+    "exam_pattern": "CIE 50 + SEE 50 marks"
   },
   "placements": {
-    "cell_location": "GV9H+4WW, K V Shankaragowda Rd, PES College Campus, Mandya, Karnataka 571401",
     "companies_visited": 359,
-    "total_offers": "2022-23: 1034 offers rolled out",
-    "students_placed": "2022-23: 549 students placed",
+    "students_placed": 549,
+    "total_offers": 1034,
     "top_companies": [
-      "TCS",
-      "Infosys",
-      "Wipro",
-      "Accenture",
-      "Capgemini",
-      "HCL",
-      "IBM",
-      "Tech Mahindra",
-      "Cognizant",
-      "MindTree"
+      "TCS", "Infosys", "Wipro", "Accenture", "Capgemini", "HCL", "IBM", "Tech Mahindra", "Cognizant", "MindTree",
+      "Bosch", "L&T", "Deloitte", "Amazon", "Cisco", "Intel", "Oracle", "SAP", "Mercedes Benz", "TVS Motors"
     ]
   },
   "facilities": {
-    "library": {
-      "name": "Library and Information Center",
-      "timing_weekday": "Lending: 10:00 AM to 5:30 PM | Reference: 8:00 AM to 8:00 PM",
-      "timing_saturday": "Lending: 9:30 AM to 1:30 PM | Reference: 8:00 AM to 5:00 PM",
-      "capacity": "100 students at a time"
-    },
-    "hostel_boys": {
-      "capacity": 350,
-      "facilities": "Free medical, Library, TV room, Wi-Fi, Solar water heaters, CCTV, Play ground, Vehicle parking, Mess"
-    },
-    "hostel_girls": {
-      "capacity": 371,
-      "facilities": "Free medical, Library, TV room, Wi-Fi, Solar water heaters, CCTV, Play ground, Mess"
-    },
-    "medical": {
-      "doctors": [
-        "Dr. Nakul N Rao (Medical Officer)",
-        "Dr. Bindiya J (Psychiatrist/Counsellor)"
-      ],
-      "services": "Essential medicines, Bed facilities, 24/7 emergency"
-    },
-    "canteen": {
-      "capacity": "250 students at a time",
-      "timing": "During college hours only",
-      "food_type": "Vegetarian & Non-vegetarian, South Indian, North Indian, Baked products"
-    }
+    "library": "13,099.38 sq ft, 100 capacity, 10AM-5:30PM",
+    "boys_hostel": "350 capacity, Warden: Dr. Srinivasa M R +919448282593",
+    "girls_hostel": "371 capacity, Warden: Shwetha M K +91 94482 82595",
+    "dispensary": "Dr. Nakul N Rao (Medical Officer), 24/7",
+    "canteen": "250 capacity, South & North Indian food",
+    "sports": "Cricket stadium, Swimming pool, Tennis courts"
   },
   "administrative": {
-    "admission": {
-      "process": "Merit-based through CET (AIDED), UNAIDED, COMED-K",
-      "email": "admissions@pesce.ac.in",
-      "phone": "+91 94482 82588"
-    },
-    "fees": {
-      "note": "Different fee structures for different programs"
-    },
-    "documents_required": [
-      "SSLC marks card",
-      "PUC marks card",
-      "CET/COMED-K Allotment order",
-      "Transfer Certificate",
-      "Aadhar Card",
-      "Passport size photos (2)",
-      "Income & Caste Certificate"
+    "admission_email": "admissions@pesce.ac.in",
+    "admission_phone": "+91 94482 82588",
+    "principal": "Dr. H. M. Nanjundaswamy",
+    "admission_types": [
+      "CET (E023)",
+      "UNAIDED (E058)",
+      "COMED-K (E089)"
+    ],
+    "required_documents": [
+      "10th/SSLC Marks Card",
+      "12th/PUC Marks Card",
+      "Transfer Certificate (TC)",
+      "Migration Certificate (if applicable)",
+      "CET/COMED-K Allotment Order and Rank Card",
+      "Caste / Income Certificate (if claiming reservation)",
+      "Aadhaar Card Copy",
+      "Recent Passport Size Photographs (Minimum 4)"
     ]
   },
-  "clubs": {
-    "note": "Information will be updated soon"
+  "contacts": {
+    "admission_helpline": "+91 94482 82588",
+    "admission_email": "admissions@pesce.ac.in",
+    "principal_office": "+91 8232 220043",
+    "boys_hostel_warden": "Dr. Srinivasa M R (+91 94482 82593)",
+    "girls_hostel_warden": "Shwetha M K (+91 94482 82595)",
+    "medical_officer": "Dr. Nakul N Rao (Available 24/7)"
+  },
+  "faq": {
+    "Admission": [
+      {
+        "question": "How do I get admission?",
+        "answer": "Admission is processed through CET, COMED-K, or Management quota (UNAIDED). You must attend the respective counseling sessions after clearing the entrance exams and select PESCE."
+      },
+      {
+        "question": "What are admission codes?",
+        "answer": "Use code E023 for Karnataka CET, E058 for UNAIDED (Management), and E089 for COMED-K during your option entry."
+      },
+      {
+        "question": "What documents do I need?",
+        "answer": "You need your 10th and 12th marks cards, Transfer Certificate, Entrance Exam Rank Card & Allotment Order, Aadhaar copy, Caste/Income certificate (if applicable), and 4 passport size photos."
+      },
+      {
+        "question": "What's the fee structure?",
+        "answer": "Fees vary strictly by quota. CET students pay government-subsidized fees, COMED-K students pay standard private fees, and UNAIDED (Management) varies by branch."
+      },
+      {
+        "question": "Can I apply for multiple admission types?",
+        "answer": "Yes, you can write multiple entrance exams (like CET and COMED-K) but you can only lock the seat under a single quota at the time of admission."
+      }
+    ],
+    "Academic": [
+      {
+        "question": "How many years is the course?",
+        "answer": "The standard B.E. (Bachelor of Engineering) program strictly lasts for 4 years, divided into 8 semesters."
+      },
+      {
+        "question": "What's the difference between CSE and CSE(AI&ML)?",
+        "answer": "CSE is general computer science covering all software engineering fundamentals. CSE(AI&ML) specializes heavily in artificial intelligence, neural networks, and data science earlier in the curriculum."
+      },
+      {
+        "question": "Is the college autonomous?",
+        "answer": "Yes! PESCE has been an autonomous institution under VTU since 2008, meaning we design our own advanced curriculum and conduct our own exams."
+      },
+      {
+        "question": "What's the exam pattern?",
+        "answer": "We follow a 50-50 model: Continuous Internal Evaluation (CIE) makes up 50 marks, and the Semester End Examination (SEE) makes up the remaining 50 marks."
+      },
+      {
+        "question": "Can I change my branch?",
+        "answer": "Branch changes are permitted at the start of the 3rd semester (2nd year) but are strictly dependent on your 1st-year CGPA and seat availability in the desired branch."
+      }
+    ],
+    "Placement": [
+      {
+        "question": "What's the average package?",
+        "answer": "The average package highly depends on the branch, but generally ranges between 5 to 8 LPA, with top technical roles exceeding 12-15+ LPA."
+      },
+      {
+        "question": "Which companies visit?",
+        "answer": "Over 350 companies visit, including giants like TCS, Infosys, Wipro, Accenture, Capgemini, HCL, IBM, Deloitte, Cisco, and Mercedes Benz."
+      },
+      {
+        "question": "What's the placement percentage?",
+        "answer": "Historically, placement percentages have remained robust across eligible students, often exceeding 85-90% for core IT and CSE branches."
+      },
+      {
+        "question": "Are internships available?",
+        "answer": "Yes, mandatory internships are built into the curriculum. Many top companies also offer pre-placement internships during the 7th/8th semester."
+      },
+      {
+        "question": "When does placement season start?",
+        "answer": "Campus placement drives primarily kick off at the very beginning of the 7th semester (final year)."
+      }
+    ],
+    "Hostel": [
+      {
+        "question": "Are hostels mandatory?",
+        "answer": "No, staying in the college hostel is completely optional. Day scholars commute normally."
+      },
+      {
+        "question": "What's the cost?",
+        "answer": "Hostel costs combine an annual room rent along with monthly sliding mess bills depending on the food divided among students. Contact the wardens for precise current rates."
+      },
+      {
+        "question": "What facilities are included?",
+        "answer": "Hostels include 24/7 security, medical emergency support via our dispensary, standard mess food (North & South Indian), and basic furniture."
+      },
+      {
+        "question": "Can I get outside accommodation?",
+        "answer": "Yes, many PG (Paying Guest) accommodations and rental options exist around the Mandya campus within walking distance."
+      },
+      {
+        "question": "Who's the hostel warden?",
+        "answer": "For Boys: Dr. Srinivasa M R (+91 94482 82593). For Girls: Shwetha M K (+91 94482 82595)."
+      }
+    ],
+    "General": [
+      {
+        "question": "How do I contact college?",
+        "answer": "You can reach the main admission line at +91 94482 82588 or email admissions@pesce.ac.in."
+      },
+      {
+        "question": "Where is the campus?",
+        "answer": "PES College of Engineering is completely situated in Mandya, Karnataka. It's easily accessible via the Bangalore-Mysore highway."
+      },
+      {
+        "question": "Are there sports facilities?",
+        "answer": "Yes! The campus boasts a massive cricket stadium, tennis courts, and a swimming pool."
+      },
+      {
+        "question": "Is WiFi available?",
+        "answer": "Yes, Wi-Fi is actively available across academic blocks, the central library, and the hostel premises."
+      }
+    ]
   }
 }
