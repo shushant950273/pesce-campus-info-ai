@@ -241,13 +241,20 @@ def format_answer(content, category):
         return "\n".join(lines)
     elif category == "cells_and_committees":
         return "\n".join([f"**{k.upper()}:** {v}" for k, v in content.items()])
+    elif category == "faq":
+        lines = ["**Frequently Asked Questions:**"]
+        for section, qas in content.items():
+            lines.append(f"\n*{section}*")
+            for qa in qas[:3]:
+                lines.append(f"**Q:** {qa.get('question', '')}\n**A:** {qa.get('answer', '')}")
+        return "\n".join(lines)
     return str(content)
 
 class QueryMatcher:
     def __init__(self, data):
         self.data = data
         self.synonyms = {
-            "college_overview": ["about", "history", "pesce", "college", "vision", "mission", "established", "naac", "nba", "accreditation", "overview"],
+            "college_overview": ["about", "history", "pesce", "college", "vision", "mission", "established", "naac", "nba", "accreditation", "overview", "location", "located"],
             "academics": ["branch", "department", "course", "program", "academic", "study", "syllabus", "engineering", "semester", "exam", "b.e.", "m.tech", "mca", "mba", "phd"],
             "departments": ["cse", "ise", "ece", "eee", "mechanical", "civil", "aiml", "faculty", "hod", "professor", "teacher", "staff"],
             "facilities": ["hostel", "dorm", "accommodation", "stay", "library", "canteen", "sports", "dispensary", "medical", "room", "facility", "wifi", "gym", "warden"],
@@ -260,8 +267,10 @@ class QueryMatcher:
         self.vocab = [w for syns in self.synonyms.values() for w in syns] + list(self.synonyms.keys())
 
     def correct_typo(self, word):
-        matches = difflib.get_close_matches(word.lower(), self.vocab, n=1, cutoff=0.7)
-        return matches[0] if matches else word.lower()
+        word = word.lower().strip("?,.!'\"")
+        if len(word) < 3: return word
+        matches = difflib.get_close_matches(word, self.vocab, n=1, cutoff=0.7)
+        return matches[0] if matches else word
 
     def match(self, query):
         if not self.data: return None, None, 0.0
