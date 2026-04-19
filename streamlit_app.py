@@ -19,6 +19,12 @@ try:
 except ImportError:
     SemanticSearcher = None
 
+try:
+    from web_scraper import PESCEScraper
+    HAS_SCRAPER = True
+except ImportError:
+    HAS_SCRAPER = False
+
 # ==========================================
 # PAGE CONFIG & STYLING
 # ==========================================
@@ -273,6 +279,18 @@ def find_answer(query):
         if isinstance(category, list):
             return "\n\n---\n\n".join([format_answer(answer_data[c], c) for c in category]), "Multiple"
         return format_answer(answer_data, category), category
+
+    # 3. FALLBACK TO WEB SCRAPING (Live search from pesce.ac.in)
+    if HAS_SCRAPER:
+        try:
+            scraper = PESCEScraper()
+            scraped_text, source_label = scraper.search(query)
+            if scraped_text:
+                answer = f"🌐 **Live from PESCE Website:**\n\n{scraped_text}\n\n---\n*Source: {source_label}*"
+                return answer, "Web Search"
+        except Exception as e:
+            print(f"Web Scraper failure: {e}")
+
     return "Mujhe is baare mein info nahi hai. Puchho: Academics, Placements, Facilities, ya Admin ke baare mein.", "General"
 
 
