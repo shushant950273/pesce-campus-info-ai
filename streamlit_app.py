@@ -319,13 +319,45 @@ class QueryMatcher:
 
 def find_answer(query):
     """
-    Master answer pipeline (5 tiers):
+    Master answer pipeline (6 tiers):
+      0. Handle greetings/conversational queries instantly
       1. Gather context from semantic search
       2. Gather context from keyword search
       3. Gather context from web scraping (pesce.ac.in)
       4. Feed ALL context to AI Engine (Groq → Gemini) for natural response
       5. Offline fallback: template-based answers if LLMs are unavailable
     """
+
+    # --- STEP 0: Conversational / Greeting Handlers ---
+    q_lower = query.lower().strip()
+    q_words = set(q_lower.split())
+
+    # Greetings
+    greetings = {"hi", "hello", "hey", "hii", "hiii", "helo", "namaste", "namaskar", "namaskara"}
+    if q_words & greetings and len(q_words) <= 3:
+        return "👋 **Hello!** Welcome to PESCE Campus Info AI!\n\nI can help you with:\n- 📚 **Academics** — Programs, departments, courses\n- 💼 **Placements** — Companies, packages, stats\n- 🏛️ **Facilities** — Hostel, library, canteen, sports\n- 📋 **Admissions** — Process, fees, documents\n- 📞 **Contacts** — Phone, email, office numbers\n\nJust ask your question! 😊", "Greeting"
+
+    # Identity questions
+    identity_keywords = ["who are you", "what are you", "your name", "introduce yourself", "about you", "what is this", "what can you do"]
+    if any(kw in q_lower for kw in identity_keywords):
+        return "🤖 I'm the **PESCE Campus Info AI** — an intelligent assistant built for students and visitors of **PES College of Engineering, Mandya**.\n\n**What I can do:**\n- Answer questions about academics, placements, hostels, and campus life\n- Provide contact details and admission information\n- Fetch live data from the official PESCE website\n\n**About PESCE:** Established in 1962, autonomous since 2008, NAAC A Grade. 🎓\n\nAsk me anything about the campus!", "General"
+
+    # Thank you
+    thanks_keywords = {"thanks", "thank", "thankyou", "dhanyavaad", "dhanyavad"}
+    if q_words & thanks_keywords:
+        return "😊 You're welcome! Feel free to ask if you have more questions about PESCE. Happy to help! 🎓", "General"
+
+    # Location
+    location_keywords = ["where is", "location", "address", "located", "how to reach", "directions", "map"]
+    if any(kw in q_lower for kw in location_keywords):
+        return "📍 **PESCE Campus Location:**\n\n**PES College of Engineering**\nMandya - 571 401, Karnataka, India\n\n🛣️ Located on the **Bangalore-Mysore Highway** (NH 275)\n📏 ~100 km from Bangalore, ~40 km from Mysore\n\n📞 **Contact:** +91 94482 82588\n📧 **Email:** admissions@pesce.ac.in\n🌐 **Website:** [pesce.ac.in](https://pesce.ac.in)", "General"
+
+    # FAQ direct request
+    faq_keywords = ["faq", "frequently asked", "common questions"]
+    if any(kw in q_lower for kw in faq_keywords):
+        if "faq" in PESCE_DATA:
+            return format_answer(PESCE_DATA["faq"], "faq"), "FAQ"
+
     semantic_result = None
     keyword_result = None
     keyword_category = None
@@ -379,9 +411,9 @@ def find_answer(query):
             print(f"[Pipeline] AI Engine failure: {e}")
 
     # --- STEP 5: Offline Fallback (template-based) ---
+    # Priority 1: Keyword match from local data
     if keyword_result and keyword_category:
         if isinstance(keyword_category, list):
-            # Format each matched category safely
             parts = []
             for c in keyword_category:
                 if c in keyword_result:
@@ -391,8 +423,19 @@ def find_answer(query):
         else:
             return format_answer(keyword_result, keyword_category), keyword_category
 
+    # Priority 2: Semantic match from local data
+    if semantic_result and keyword_category:
+        return format_answer(semantic_result, keyword_category), keyword_category
+
+    # Priority 3: Scraped text — but CLEAN and CAPPED (no raw dumps)
     if scraped_text:
-        return f"🌐 **Live from PESCE Website:**\n\n{scraped_text}", "Web Search"
+        # Clean up scraped text: limit to first 600 chars, cut at sentence boundary
+        clean_text = scraped_text[:800]
+        # Try to cut at last sentence ending
+        last_period = clean_text.rfind('.')
+        if last_period > 200:
+            clean_text = clean_text[:last_period + 1]
+        return f"🌐 **From PESCE Website:**\n\n{clean_text}\n\n---\n_For more details, visit [pesce.ac.in](https://pesce.ac.in) or contact 📞 +91 94482 82588_", "Web Search"
 
     return "I don't have specific information about that. You can ask me about: **Academics**, **Placements**, **Facilities**, **Admissions**, or **Contact Info**. \n\nOr reach out directly at 📧 admissions@pesce.ac.in | 📞 +91 94482 82588", "General"
 
