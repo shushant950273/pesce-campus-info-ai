@@ -195,7 +195,7 @@ def auto_detect_language(text):
 
 def localize_response(response_text, category, lang):
     if lang == "English": return response_text
-    if "Mujhe is baare mein" in response_text or "No info" in response_text: return LANG_DICT[lang].get("fallback", response_text)
+    if "I don't have specific information" in response_text or "No info" in response_text: return LANG_DICT[lang].get("fallback", response_text)
     if HAS_TRANSLATOR:
         lang_code = "hi" if lang == "Hindi" else "kn"
         try: return GoogleTranslator(source='auto', target=lang_code).translate(response_text)
@@ -211,51 +211,72 @@ def localize_response(response_text, category, lang):
 # QUERY MATCHER CLASS
 # ==========================================
 def format_answer(content, category):
-    if category == "college_overview":
-        return f"**{content.get('full_name', 'PESCE')}**\n\n🏫 Established: {content.get('established')}\n📍 {content.get('campus_location')}\n🏆 {', '.join(content.get('accreditations', [])[:3])}\n\n**Vision:** {content.get('vision', '')}\n\n👨‍🎓 {content.get('total_students', '')} Students | 📊 {content.get('total_placements', '')} Placements | 🎓 {content.get('phds_awarded', '')} PhDs"
-    elif category == "academics":
-        ug = content.get("undergraduate_programs", [])
-        programs = [p.get("name", "") for p in ug[:8]]
-        return f"**Academic Structure:** {content.get('structure')}\n\n**Exam Pattern:** {content.get('exam_pattern')}\n\n**UG Programs ({len(ug)}):** {', '.join(programs)}...\n\n**PG Programs:** {len(content.get('postgraduate_programs', []))} programs (M.Tech, MCA, MBA)\n\n**Branch Change:** {content.get('branch_change', 'N/A')}"
-    elif category == "departments":
-        parts = []
-        for dept_code, dept_data in content.items():
-            parts.append(f"**{dept_data.get('full_name', dept_code)}** (HOD: {dept_data.get('hod', 'N/A')})")
-            faculty = dept_data.get("faculty", [])
-            if faculty:
-                parts.append(f"  Faculty: {len(faculty)} members")
-        return "\n".join(parts)
+    if category == "academics":
+        programs = content.get("programs", [])
+        return f"**Academic Structure:** {content.get('structure')}\n\n**Semester:** {content.get('semester')}\n\n**Programs:** {', '.join(programs[:5])}... and more"
     elif category == "placements":
-        team = content.get("placement_team", [])
-        team_str = ", ".join([f"{t['name']} ({t['role']})" for t in team[:4]])
         companies = content.get("top_companies", [])
-        return f"**Placement Officer:** {content.get('placement_officer', 'N/A')}\n📧 {content.get('placement_email')}\n\n**Team:** {team_str}\n\n**Stats:** {content.get('companies_visited')} companies | {content.get('students_placed')} placed | {content.get('total_offers')} offers\n\n**Top Companies:** {', '.join(companies[:10])}"
+        return f"**Companies:** {', '.join(companies[:7])}\n\n**Total Companies:** {content.get('companies_visited')}\n\n**Placements:** {content.get('students_placed')}"
     elif category == "facilities":
-        bh = content.get("boys_hostel", {})
-        gh = content.get("girls_hostel", {})
-        return f"**Library:** {content.get('library', {}).get('area', 'N/A')}\n\n**Boys Hostel:** {bh.get('total_capacity', 'N/A')} capacity | Warden: {bh.get('warden', 'N/A')} ({bh.get('warden_phone', '')})\n\n**Girls Hostel:** {gh.get('total_inmates', 'N/A')} capacity | Warden: {gh.get('warden', 'N/A')} ({gh.get('warden_phone', '')})\n\n**Medical:** {content.get('dispensary', {}).get('medical_officer', 'N/A')} (24/7)\n\n**Canteen:** {content.get('canteen', {}).get('capacity', 'N/A')} capacity\n\n**Sports:** {', '.join(content.get('sports', {}).get('facilities', []))}"
+        parts = ["**Campus Facilities:**"]
+        if content.get("library"): parts.append(f"- 📚 **Library:** {content['library']}")
+        if content.get("boys_hostel"): parts.append(f"- 🏠 **Boys Hostel:** {content['boys_hostel']}")
+        if content.get("girls_hostel"): parts.append(f"- 🏠 **Girls Hostel:** {content['girls_hostel']}")
+        if content.get("dispensary"): parts.append(f"- 🏥 **Medical:** {content['dispensary']}")
+        if content.get("canteen"): parts.append(f"- 🍽️ **Canteen:** {content['canteen']}")
+        if content.get("sports"): parts.append(f"- 🏟️ **Sports:** {content['sports']}")
+        return "\n".join(parts)
     elif category == "administrative":
-        return f"**Principal:** {content.get('principal', 'N/A')}\n**Vice Principal:** {content.get('vice_principal', 'N/A')}\n\n📧 {content.get('admission_email')}\n📞 {content.get('admission_phone')}\n\n**Admission Codes:** " + ", ".join([f"{a['type']} ({a['code']})" for a in content.get("admission_types", [])])
+        parts = ["**Administrative Info:**"]
+        if content.get("principal"): parts.append(f"- 👨‍💼 **Principal:** {content['principal']}")
+        if content.get("admission_email"): parts.append(f"- 📧 **Admission Email:** {content['admission_email']}")
+        if content.get("admission_phone"): parts.append(f"- 📞 **Phone:** {content['admission_phone']}")
+        if content.get("admission_types"): parts.append(f"- 🎓 **Admission Types:** {', '.join(content['admission_types'])}")
+        if content.get("required_documents"): parts.append(f"- 📄 **Documents Required:** {', '.join(content['required_documents'][:5])}...")
+        return "\n".join(parts)
     elif category == "contacts":
-        lines = [f"**{k.replace('_', ' ').title()}:** {v}" for k, v in content.items()]
-        return "\n".join(lines)
-    elif category == "cells_and_committees":
-        return "\n".join([f"**{k.upper()}:** {v}" for k, v in content.items()])
+        parts = ["**Contact Information:**"]
+        for key, value in content.items():
+            label = key.replace("_", " ").title()
+            parts.append(f"- 📞 **{label}:** {value}")
+        return "\n".join(parts)
+    elif category == "faq":
+        # Format FAQ sections nicely instead of dumping raw dict
+        parts = ["**Frequently Asked Questions:**\n"]
+        if isinstance(content, dict):
+            for section, questions in content.items():
+                parts.append(f"**{section}:**")
+                if isinstance(questions, list):
+                    for item in questions[:3]:  # Show top 3 per section
+                        if isinstance(item, dict):
+                            parts.append(f"- **Q:** {item.get('question', '')}")
+                            parts.append(f"  **A:** {item.get('answer', '')}")
+                        else:
+                            parts.append(f"- {item}")
+                parts.append("")
+        return "\n".join(parts)
+    # Generic fallback: try to format dicts nicely instead of raw str()
+    if isinstance(content, dict):
+        parts = []
+        for key, value in content.items():
+            label = key.replace("_", " ").title()
+            if isinstance(value, list):
+                parts.append(f"**{label}:** {', '.join(str(v) for v in value[:5])}")
+            elif isinstance(value, dict):
+                parts.append(f"**{label}:** (see details below)")
+            else:
+                parts.append(f"**{label}:** {value}")
+        return "\n".join(parts) if parts else str(content)
     return str(content)
 
 class QueryMatcher:
     def __init__(self, data):
         self.data = data
         self.synonyms = {
-            "college_overview": ["about", "history", "pesce", "college", "vision", "mission", "established", "naac", "nba", "accreditation", "overview"],
-            "academics": ["branch", "department", "course", "program", "academic", "study", "syllabus", "engineering", "semester", "exam", "b.e.", "m.tech", "mca", "mba", "phd"],
-            "departments": ["cse", "ise", "ece", "eee", "mechanical", "civil", "aiml", "faculty", "hod", "professor", "teacher", "staff"],
-            "facilities": ["hostel", "dorm", "accommodation", "stay", "library", "canteen", "sports", "dispensary", "medical", "room", "facility", "wifi", "gym", "warden"],
-            "placements": ["placement", "job", "recruitment", "hiring", "company", "companies", "offer", "package", "salary", "internship", "career", "training"],
-            "administrative": ["fee", "tuition", "payment", "cost", "admission", "admin", "contact", "email", "phone", "document", "principal", "vice principal"],
-            "contacts": ["number", "call", "helpline", "reach", "address", "mobile"],
-            "cells_and_committees": ["nss", "iste", "ieee", "iqac", "grievance", "committee", "club", "cell"],
-            "faq": ["faq", "question", "doubt", "help", "how", "what", "where", "when", "who"]
+            "academics": ["branch", "department", "course", "program", "academic", "study", "syllabus", "engineering"],
+            "facilities": ["hostel", "dorm", "accommodation", "stay", "library", "canteen", "sports", "dispensary", "medical", "room", "facility"],
+            "placements": ["placement", "job", "recruitment", "hiring", "company", "companies", "offer", "package", "salary", "internship", "career"],
+            "administrative": ["fee", "tuition", "payment", "cost", "admission", "admin", "contact", "email", "phone", "document", "principal"]
         }
         self.vocab = [w for syns in self.synonyms.values() for w in syns] + list(self.synonyms.keys())
 
@@ -266,10 +287,13 @@ class QueryMatcher:
     def match(self, query):
         if not self.data: return None, None, 0.0
         corrected_words = [self.correct_typo(w) for w in query.lower().split()]
-        scores = {cat: 0.0 for cat in self.data.keys()}
+        # Only score categories that have formatters — skip 'faq' from keyword matching
+        # since it's a meta-category (its content gets matched via other categories)
+        scorable_cats = {k: v for k, v in self.data.items() if k != "faq"}
+        scores = {cat: 0.0 for cat in scorable_cats.keys()}
         
         for word in corrected_words:
-            for cat, content in self.data.items():
+            for cat, content in scorable_cats.items():
                 if word == cat: scores[cat] += 1.0 
                 elif word in self.synonyms.get(cat, []): scores[cat] += 0.8
                 elif word in str(content).lower(): scores[cat] += 0.2
@@ -282,13 +306,16 @@ class QueryMatcher:
         if not results: return None, None, 0.0
         best_conf = results[0]["confidence"]
         
-        if len(results) > 1:
-            return {r["category"]: r["content"] for r in results}, [r["category"] for r in results], best_conf
-        else:
-            cat, content = results[0]["category"], dict(results[0]["content"])
-            if cat == "placements" and any(cw in ["cse", "cs", "computer"] for cw in corrected_words):
-                content["filter_note"] = "💡 Note: Placements listed are overall numbers (includes CSE specific data)."
-            return content, cat, best_conf
+        # If multiple categories match, return only the top one for cleaner output
+        # (multi-category dumps were producing messy responses)
+        cat = results[0]["category"]
+        try:
+            content = dict(results[0]["content"])
+        except (TypeError, ValueError):
+            content = results[0]["content"]
+        if cat == "placements" and any(cw in ["cse", "cs", "computer"] for cw in corrected_words):
+            content["filter_note"] = "💡 Note: Placements listed are overall numbers (includes CSE specific data)."
+        return content, cat, best_conf
 
 def find_answer(query):
     """
@@ -354,13 +381,20 @@ def find_answer(query):
     # --- STEP 5: Offline Fallback (template-based) ---
     if keyword_result and keyword_category:
         if isinstance(keyword_category, list):
-            return "\n\n---\n\n".join([format_answer(keyword_result[c], c) for c in keyword_category]), "Multiple"
-        return format_answer(keyword_result, keyword_category), keyword_category
+            # Format each matched category safely
+            parts = []
+            for c in keyword_category:
+                if c in keyword_result:
+                    parts.append(format_answer(keyword_result[c], c))
+            if parts:
+                return "\n\n---\n\n".join(parts), "Multiple"
+        else:
+            return format_answer(keyword_result, keyword_category), keyword_category
 
     if scraped_text:
         return f"🌐 **Live from PESCE Website:**\n\n{scraped_text}", "Web Search"
 
-    return "Mujhe is baare mein info nahi hai. Puchho: Academics, Placements, Facilities, ya Admin ke baare mein.", "General"
+    return "I don't have specific information about that. You can ask me about: **Academics**, **Placements**, **Facilities**, **Admissions**, or **Contact Info**. \n\nOr reach out directly at 📧 admissions@pesce.ac.in | 📞 +91 94482 82588", "General"
 
 
 # ==========================================

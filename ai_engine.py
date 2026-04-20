@@ -14,6 +14,7 @@ then produces a helpful, accurate, college-specific response.
 import streamlit as st
 import json
 import requests
+import time
 
 # ==========================================
 # API KEY LOADING
@@ -90,7 +91,7 @@ def build_context(query, json_data=None, semantic_result=None, scraped_text=None
 def query_groq(query, context, lang="English"):
     """
     Send query to Groq API (Llama 3.3 70B) for response generation.
-    Groq offers extremely fast inference.
+    Groq offers extremely fast inference. Retries on 429 rate limiting.
     """
     api_key = _get_key("GROQ_API_KEY")
     if not api_key:
@@ -115,14 +116,28 @@ def query_groq(query, context, lang="English"):
         "top_p": 0.9,
     }
 
-    try:
-        resp = requests.post(url, json=payload, headers=headers, timeout=15)
-        resp.raise_for_status()
-        data = resp.json()
-        return data["choices"][0]["message"]["content"].strip()
-    except Exception as e:
-        print(f"[AI Engine] Groq API error: {e}")
-        return None
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            resp = requests.post(url, json=payload, headers=headers, timeout=15)
+            if resp.status_code == 429:
+                wait_time = min(2 ** attempt * 2, 10)  # 2s, 4s, 8s (capped at 10s)
+                print(f"[AI Engine] Groq rate limited, retrying in {wait_time}s (attempt {attempt+1}/{max_retries})")
+                time.sleep(wait_time)
+                continue
+            resp.raise_for_status()
+            data = resp.json()
+            return data["choices"][0]["message"]["content"].strip()
+        except requests.exceptions.HTTPError as e:
+            if resp.status_code != 429:
+                print(f"[AI Engine] Groq API error: {e}")
+                return None
+        except Exception as e:
+            print(f"[AI Engine] Groq API error: {e}")
+            return None
+    
+    print("[AI Engine] Groq: all retries exhausted")
+    return None
 
 
 # ==========================================
@@ -131,7 +146,7 @@ def query_groq(query, context, lang="English"):
 def query_gemini(query, context, lang="English"):
     """
     Send query to Google Gemini API as a fallback.
-    Tries primary key first, then secondary key.
+    Tries primary key first, then secondary key. Retries on 429.
     """
     keys = [_get_key("GEMINI_API_KEY"), _get_key("GEMINI_API_KEY_2")]
     keys = [k for k in keys if k]  # Filter empty
@@ -160,14 +175,27 @@ Respond in {lang}."""
             }
         }
 
-        try:
-            resp = requests.post(url, json=payload, timeout=15)
-            resp.raise_for_status()
-            data = resp.json()
-            return data["candidates"][0]["content"]["parts"][0]["text"].strip()
-        except Exception as e:
-            print(f"[AI Engine] Gemini API error with key ...{api_key[-6:]}: {e}")
-            continue
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                resp = requests.post(url, json=payload, timeout=15)
+                if resp.status_code == 429:
+                    wait_time = min(2 ** attempt * 2, 10)
+                    print(f"[AI Engine] Gemini rate limited (key ...{api_key[-6:]}), retrying in {wait_time}s (attempt {attempt+1}/{max_retries})")
+                    time.sleep(wait_time)
+                    continue
+                resp.raise_for_status()
+                data = resp.json()
+                return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            except requests.exceptions.HTTPError as e:
+                if resp.status_code != 429:
+                    print(f"[AI Engine] Gemini API error with key ...{api_key[-6:]}: {e}")
+                    break  # Try next key
+            except Exception as e:
+                print(f"[AI Engine] Gemini API error with key ...{api_key[-6:]}: {e}")
+                break  # Try next key
+        
+        print(f"[AI Engine] Gemini: retries exhausted for key ...{api_key[-6:]}")
 
     return None
 
