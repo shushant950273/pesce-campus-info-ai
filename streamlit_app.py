@@ -272,7 +272,7 @@ def process_query(query):
 # SIDEBAR
 # ═══════════════════════════════════════════
 with st.sidebar:
-    st.image("https://images.weserv.nl/?url=pesce.ac.in/assets/img/logo.png", width=180)
+    st.image("assets/logo.svg", width=180)
     st.markdown("### 🎓 Campus Assistant")
     
     st.markdown("""<div class="sidebar-section">
