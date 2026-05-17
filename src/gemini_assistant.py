@@ -62,7 +62,7 @@ class GeminiAssistant:
         if any(w in query_lower for w in ["about", "vision", "mission", "principal", "history"]):
             relevant_sections.append(("About PESCE", self.pesce_data.get("about", {})))
             
-        # ALWAYS append a Master Summary of Courses and FAQs so the bot NEVER fails to answer basic questions
+        # ALWAYS append a Master Summary of Courses, FAQs, and Locations so the bot NEVER fails basic questions
         master_summary = {
             "Undergraduate (B.E.) Courses": [
                 "Computer Science & Engineering (CSE)",
@@ -84,13 +84,24 @@ class GeminiAssistant:
                 "Master of Business Administration (MBA)",
                 "M.Tech in CSE, Machine Design, VLSI & ES, Civil CAD"
             ],
-            "Basic FAQs": {
-                "Is it autonomous?": "Yes, PESCE is autonomous under VTU, Belagavi and approved by AICTE.",
-                "Where is it located?": "Mandya, Karnataka (55+ acres lush green campus).",
-                "What is the highest package?": "Top recruiters include TCS, Infosys, Wipro. Contact placement cell for highest package."
+            "Frequently Asked Questions (FAQs)": {
+                "Is it autonomous or private?": "PESCE is a government-aided autonomous engineering college established in 1962 under VTU, Belagavi and approved by AICTE.",
+                "What are the accepted entrance exams?": "Admissions are primarily based on KCET for Karnataka students and COMEDK UGET for out-of-state students. Management quota is also available.",
+                "What is the eligibility criteria?": "10+2 with Physics & Math as mandatory subjects, securing at least 45% aggregate marks (40% for reserved categories).",
+                "Are there scholarships?": "Yes, various government/state-level scholarships are available, including the Supernumerary Quota (SNQ) for reduced fees.",
+                "What is the fee structure?": "Fees vary based on admission quota (CET, COMEDK, Management). Please check the official college website or contact admissions@pesce.ac.in for current exact fees.",
+                "Where is it located?": "Mandya, Karnataka. It has a beautiful 55+ acres lush green campus."
+            },
+            "Campus Navigation & Locations (Google Maps Data)": {
+                "College Canteen": "The canteen is on the same lane of the college entry gate, around 300 meters away from the main gate in the same lane.",
+                "Central Library": "Located at the heart of the campus, near the main administrative block.",
+                "CSE Department": "Located in the newer academic block behind the main building.",
+                "Boys Hostel": "Located inside the campus, near the sports ground.",
+                "Girls Hostel": "Located securely within the campus premises with strict security.",
+                "Main Gate": "Faces the main Mandya city road, providing easy access to transport."
             }
         }
-        relevant_sections.append(("Master Summary (Courses & FAQs)", master_summary))
+        relevant_sections.append(("Master Summary (Courses, FAQs & Campus Map)", master_summary))
             
         if not relevant_sections:
             relevant_sections.append(("Homepage & Stats", self.pesce_data.get("homepage", {})))
