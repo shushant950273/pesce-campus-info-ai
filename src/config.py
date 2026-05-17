@@ -10,7 +10,7 @@ VECTOR_DB_DIR = DATA_DIR / "vectors" / "faiss_index"
 
 # College Constants
 COLLEGE_NAME = "PES College of Engineering (PESCE)"
-COLLEGE_WEBSITE = "https://www.pesmandya.org"
+COLLEGE_WEBSITE = "https://pesce.ac.in"
 COLLEGE_LOCATION = "Mandya, Karnataka, India"
 
 # Info Categories

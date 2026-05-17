@@ -34,5 +34,28 @@ class DocumentProcessor:
         return chunks
         
 if __name__ == "__main__":
+    import json
+    from config import RAW_DATA_DIR, PROCESSED_DATA_DIR
     processor = DocumentProcessor()
-    print("DocumentProcessor initialized.")
+    print("Starting document processing...")
+    
+    all_chunks_data = []
+    
+    if os.path.exists(RAW_DATA_DIR):
+        for filename in os.listdir(RAW_DATA_DIR):
+            if filename.endswith(".pdf"):
+                file_path = os.path.join(RAW_DATA_DIR, filename)
+                print(f"Processing {filename}...")
+                chunks = processor.process_and_chunk_pdf(file_path, category="General")
+                
+                # Convert LangChain chunks to dicts
+                for chunk in chunks:
+                    all_chunks_data.append({
+                        "content": chunk.page_content,
+                        "metadata": chunk.metadata
+                    })
+                    
+    output_path = os.path.join(PROCESSED_DATA_DIR, "processed_chunks.json")
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(all_chunks_data, f, indent=4)
+        print(f"Total {len(all_chunks_data)} chunks saved to {output_path}")
